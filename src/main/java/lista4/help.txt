@@ -1,0 +1,31 @@
+server ma połączenie z 2 klientami
+jest apka klienta i serwera
+komunikacje międy nimi robi jeden
+
+Klient łączy się serwerem poprzez podanie adresu
+dołącza do gry
+otrzymuje od serwera kolor pionków (klasa pionek)
+
+
+server ma stan:
+- czekania na użytkowników, 
+- ruch czarnego
+- ruch białego
+- obsługa gry/ruchów/interpretacja inputa
+-  
+
+grę robi 2
+
+
+classes:
+klasa server [dodatkowo konsola serwera aby widzieć co robi w danym momencie]
+klasa client UI - konsola dla klienta (może się pooddać lub pominąć ruch)
+klasa client - komunikować się z serwerem
+klasa pionek
+klasa łańcuch pionków
+klasa kompozytu do obsługi pionków i łańcuchów
+klasa gra
+klasa plansza
+klasa interpretera pomiędzy serwerem a grą
+
+
