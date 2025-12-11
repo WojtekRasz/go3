@@ -1,4 +1,4 @@
-package lista4;
+package lista4.gameLogic;
 
 public class Game {
 
@@ -14,6 +14,7 @@ public class Game {
     }
 
     private static Game instance;
+    private Board board;
 
 
 
@@ -25,8 +26,8 @@ public class Game {
         return instance;
     }
 
-    private boolean validateMove(Move move){
-        return false;
+    public boolean validateMove(Move move){
+        return board.isFieldAvailable(move.x, move.y, move.player);
     }
 
 

@@ -1,4 +1,4 @@
-package lista4;
+package lista4.gameLogic;
 
 public class Stone {
     private int posX;
