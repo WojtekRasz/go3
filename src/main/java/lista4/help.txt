@@ -51,7 +51,7 @@ public class RunningState implements GameStateBehaviour {
     // ... pozostałe metody ...
 
     @Override
-    public String handleMove(String moveCommand, Player player) {
+    public String handleMove(String moveCommand, Player playerColor) {
         // Ruch jest DOZWOLONY. Tutaj jest WŁAŚCIWA logika walidacji i wykonania ruchu.
         // Ta logika może być zaimplementowana bezpośrednio tu, lub we wstrzykniętej 
         // usłudze, aby utrzymać czystość.
@@ -65,7 +65,7 @@ public class RunningState implements GameStateBehaviour {
     }
     
     @Override
-    public String handlePlayerJoin(Game gameContext, Player player) {
+    public String handlePlayerJoin(Game gameContext, Player playerColor) {
         // W stanie działania, nie pozwalamy nowym graczom dołączyć.
         return "ERROR: Game is already running. Please try again later.";
     }
@@ -82,15 +82,15 @@ public class Game {
     // ... pola, metody dostępu ...
 
     // Metoda przyjmuje komendę z InputAdaptera
-    public String attemptMove(String moveCommand, Player player) {
+    public String attemptMove(String moveCommand, Player playerColor) {
         // CAŁA DECYZJA JEST DELEGOWANA do aktualnego obiektu Stanu
-        return currentStateBehaviour.handleMove(moveCommand, player);
+        return currentStateBehaviour.handleMove(moveCommand, playerColor);
     }
     
     // Uproszczona obsługa dołączenia gracza
-    public void playerJoined(Player player) {
+    public void playerJoined(Player playerColor) {
         // Stan sam decyduje, co ma się stać (zmiana stanu lub pozostanie w tym samym)
-        GameStateBehaviour nextState = currentStateBehaviour.handlePlayerJoin(this, player);
+        GameStateBehaviour nextState = currentStateBehaviour.handlePlayerJoin(this, playerColor);
         this.currentStateBehaviour = nextState;
         
         // Jeśli potrzebujesz, aby GameLogic zaktualizowało widoki:

@@ -19,9 +19,9 @@ class ClientThread implements Runnable {
     private Socket socket;
     GameInputAdapter inAdapter;
     GameOutputAdapter outAdapter;
-    GameManager.Player color;
+    GameManager.PlayerColor color;
 
-    ClientThread(Socket socket, GameInputAdapter inAdapter, GameOutputAdapter outAdapter, GameManager.Player color) {
+    ClientThread(Socket socket, GameInputAdapter inAdapter, GameOutputAdapter outAdapter, GameManager.PlayerColor color) {
         this.socket = socket;
         this.inAdapter = inAdapter;
         this.outAdapter = outAdapter;

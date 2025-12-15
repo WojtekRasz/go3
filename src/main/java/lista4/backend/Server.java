@@ -38,10 +38,10 @@ public class Server {
                 // przypisanie nowego socketu do wątku,
                 // wątek ma mieć adaptery, a nie grę na razie sprawdzam
                 if (i == 0) {
-                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, GameManager.Player.BLACK));
+                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, GameManager.PlayerColor.BLACK));
                     i = i + 1;
                 } else {
-                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, GameManager.Player.WHITE));
+                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, GameManager.PlayerColor.WHITE));
 
                 }
             }

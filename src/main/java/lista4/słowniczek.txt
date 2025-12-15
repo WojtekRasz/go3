@@ -13,9 +13,9 @@ Wyjaśnienie klas:
 -Klient - program, który łączy się z serwerem.
 
 
-różnica między klient a player:
+różnica między klient a playerColor:
     - klient to jest program zewnętrzny, który łączy się z serwerem. Gra nie musi wiedzieć czym jest klient.
-    - player(gracz) jest pojęciem, które reprezentuje klienta w klasach związanych z grą (można powiedzieć, że klient wciela się w gracza)
+    - playerColor(gracz) jest pojęciem, które reprezentuje klienta w klasach związanych z grą (można powiedzieć, że klient wciela się w gracza)
 
 Stany:
     GAME_NOT_RUNNING - stan gdy gra nie jest aktywna
