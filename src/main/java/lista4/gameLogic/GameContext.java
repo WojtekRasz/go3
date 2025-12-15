@@ -4,13 +4,13 @@ import lista4.gameLogic.state.GameState;
 
 public class GameContext {
 
-    GameState curGameState;
+    private GameState curGameState;
 
     GameContext( GameState initialState ) {
         curGameState = initialState;
     }
 
-    public GameState getGameState() {
+    public GameState getCurrentGameState() {
         return curGameState;
     }
 

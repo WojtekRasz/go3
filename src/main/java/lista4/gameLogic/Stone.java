@@ -4,46 +4,43 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Stone {
-    public static class Breath{
-        int x;
-        int y;
 
-        public Breath(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if(o instanceof Breath){
-                return ((Breath) o).x == this.x && ((Breath) o).y == this.y;
-            }
-            return false;
-        }
-    }
-
-    private final int posX;
-    private final int posY;
+    private final int x;
+    private final int y;
     private final GameManager.PlayerColor playerColor;
-    private final Set<Breath> breathes;
+    private final Board board;
+    private final Set<Field> breathes;
 
 
-    public Stone(int posX, int posY, GameManager.PlayerColor playerColor) {
-        this.posX = posX;
-        this.posY = posY;
+    public Stone(int x, int y, GameManager.PlayerColor playerColor, Board board) {
+        this.x = x;
+        this.y = y;
         this.playerColor = playerColor;
-        breathes = new HashSet<Breath>();
+        this.board = board;
+        breathes = new HashSet<Field>();
+        updateBreaths();
     }
 
     public GameManager.PlayerColor getPlayerColor() {
         return playerColor;
     }
 
-    public void removeBreath(Breath breath) {
+    public void updateBreaths(){
+        for (Board.Direction direction : Board.Direction.values()) {
+            if(board.isEmpty(x + direction.getX(), y + direction.getY())){
+                addBreath(board.getField(x + direction.getX(), y + direction.getY()));
+            }
+            else {
+                removeBreath(board.getField(x + direction.getX(), y + direction.getY()));
+            }
+        }
+    }
+
+    public void removeBreath(Field breath) {
         breathes.remove(breath);
     }
 
-    public void addBreath(Breath breath) {
+    public void addBreath(Field breath) {
         breathes.add(breath);
     }
 
