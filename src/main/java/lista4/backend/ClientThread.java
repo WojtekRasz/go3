@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 import lista4.gameInterface.GameInputAdapter;
 import lista4.gameInterface.GameOutputAdapter;
@@ -21,13 +22,15 @@ class ClientThread implements Runnable {
     GameInputAdapter inAdapter;
     GameOutputAdapter outAdapter;
     PlayerColor color;
+    ArrayList gamers;
 
     ClientThread(Socket socket, GameInputAdapter inAdapter, GameOutputAdapter outAdapter,
-            PlayerColor color) {
+            PlayerColor color, ArrayList gamers) {
         this.socket = socket;
         this.inAdapter = inAdapter;
         this.outAdapter = outAdapter;
         this.color = color;
+        this.gamers = gamers;
     }
 
     @Override
@@ -56,6 +59,7 @@ class ClientThread implements Runnable {
             System.err.println("Błąd komunikacji z klientem " + socket.getInetAddress() + ": " + e.getMessage());
         } finally {
             try {
+                gamers.remove(color);
                 socket.close();
                 System.out.println(">> Połączenie zakończone z klientem: " + socket.getInetAddress());
             } catch (IOException e) {

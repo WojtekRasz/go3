@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.ArrayList;
 
 import lista4.gameLogic.GameManager;
 import lista4.gameLogic.PlayerColor;
@@ -20,6 +22,8 @@ import lista4.adapters.OutputGameAdapter;
 public class Server {
     private static int GAMERS_NUMBER = 2;
     private static final int PORT = 12345;
+
+    private static ArrayList<PlayerColor> gamers = new ArrayList<>();
     public static GameManager gameManager = GameManager.getInstance();
 
     private static GameInputAdapter inAdapter = new InputGameAdapter(gameManager);
@@ -34,17 +38,17 @@ public class Server {
         int i = 0;
         try (ServerSocket listener = new ServerSocket(PORT)) {
             while (true) {
-                // listener.accept() blokuje wątek główny, czekając na połączenie
                 Socket clientSocket = listener.accept();
                 System.out.println(">> Połączono z klientem: " + clientSocket.getInetAddress());
                 // przypisanie nowego socketu do wątku,
                 // wątek ma mieć adaptery, a nie grę
-                if (i == 0) {
-                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, PlayerColor.BLACK));
-                    i = i + 1;
-                } else {
-                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, PlayerColor.WHITE));
+                if (gamers.size() < 2 && !gamers.contains(PlayerColor.BLACK)) {
+                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, PlayerColor.BLACK, gamers));
+                    gamers.add(PlayerColor.BLACK);
+                } else if (gamers.size() < 2 && !gamers.contains(PlayerColor.WHITE)) {
+                    pool.execute(new ClientThread(clientSocket, inAdapter, outAdapter, PlayerColor.WHITE, gamers));
                     gameManager.startGame();
+                    gamers.add(PlayerColor.WHITE);
                 }
             }
         } finally {
