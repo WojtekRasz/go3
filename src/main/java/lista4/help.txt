@@ -7,8 +7,7 @@ dołącza do gry
 otrzymuje od serwera kolor pionków (klasa pionek)
 
 
-server ma stan:
-- czekania na użytkowników, 
+gra ma stan:
 - ruch czarnego
 - ruch białego
 - obsługa gry/ruchów/interpretacja inputa
@@ -29,3 +28,74 @@ klasa plansza
 klasa interpretera pomiędzy serwerem a grą
 
 
+--------------------------
+Serwer i ClientThread dałem do katalogu backend
+a interfejs użytkownika czyli Client do frontend
+
+Dodałem stany gry - aby jak 1 klient jest zalogowany to 
+gra nie wykonywała ruchów bo gra się wtedy nie zaczęła.
+Dopiero gdy jest 2 graczy zmieniamy stan na grywalny
+(bazuje na przykładach z plików z wykładu i poprzedniej listy od prowadzącego wdrażając state)
+
+TYLE ŻE GRYWALNE STANY TO BĘDĄ STANY WHITEMOVE I BLACKMOVE i gra wysyła do current state ruch gracza, a stan decyduje czy starać się ruch wykonać czy zwrócić błąd "nie twój ruch, teraz inny gracz" do danego gracza
+
+do gameManager trzeba dodać obsługę stanów
+- czyli gameManager ma setState a w stanach jest obsługa
+- stan wysyła message na out jeśli jest błąd
+Przykład z chata jak to wygląda:
+Przykład: RunningState
+Java
+
+// W lista4.gameLogic.state.ProcessingState
+public class RunningState implements GameStateBehaviour {
+    // ... pozostałe metody ...
+
+    @Override
+    public String handleMove(String moveCommand, Player playerColor) {
+        // Ruch jest DOZWOLONY. Tutaj jest WŁAŚCIWA logika walidacji i wykonania ruchu.
+        // Ta logika może być zaimplementowana bezpośrednio tu, lub we wstrzykniętej 
+        // usłudze, aby utrzymać czystość.
+        
+        // Zwykle w tej metodzie:
+        // 1. Walidacja: Czy to ruch tego gracza? Czy jest poprawny?
+        // 2. Aktualizacja: Zmień stan planszy w kontekście Game.
+        // 3. Powiadomienie: Wywołaj Game.notifyAdapters().
+        
+        return "OK: " + moveCommand + " accepted.";
+    }
+    
+    @Override
+    public String handlePlayerJoin(Game gameContext, Player playerColor) {
+        // W stanie działania, nie pozwalamy nowym graczom dołączyć.
+        return "ERROR: Game is already running. Please try again later.";
+    }
+}
+3. Implementacja w Klasie Kontekstu Game
+Klasa Game (kontekst) nie ma już żadnych if ani switch sprawdzających stan!
+
+Java
+
+// W lista4.gameLogic.GameManager
+public class Game {
+    
+    private GameStateBehaviour currentStateBehaviour;
+    // ... pola, metody dostępu ...
+
+    // Metoda przyjmuje komendę z InputAdaptera
+    public String attemptMove(String moveCommand, Player playerColor) {
+        // CAŁA DECYZJA JEST DELEGOWANA do aktualnego obiektu Stanu
+        return currentStateBehaviour.handleMove(moveCommand, playerColor);
+    }
+    
+    // Uproszczona obsługa dołączenia gracza
+    public void playerJoined(Player playerColor) {
+        // Stan sam decyduje, co ma się stać (zmiana stanu lub pozostanie w tym samym)
+        GameStateBehaviour nextState = currentStateBehaviour.handlePlayerJoin(this, playerColor);
+        this.currentStateBehaviour = nextState;
+        
+        // Jeśli potrzebujesz, aby GameLogic zaktualizowało widoki:
+        // notifyAdapters(currentStateBehaviour.getState());
+    }
+}
+Podsumowanie
+Zamiast: if (stan == WAITING) w każdej metodzie Game. Użyj: currentStateBehaviour.handleAkcja(...) w każdej metodzie Game.
