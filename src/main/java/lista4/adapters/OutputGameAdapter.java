@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentMap;
 import lista4.gameInterface.GameOutputAdapter;
 import lista4.gameLogic.Board;
 import lista4.gameLogic.GameManager;
+import lista4.gameLogic.gameExceptions.OutputException;
+import lista4.gameLogic.state.GameState;
 
 /**
  * Class uses Observers (ClientThread) to communicate with client
@@ -17,6 +19,16 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
 
     public void registerPlayer(GameManager.PlayerColor color, PrintWriter out) {
         activeWriters.put(color, out);
+    }
+
+    @Override
+    public void sendState(GameState gameState, GameManager.PlayerColor target) {
+
+    }
+
+    @Override
+    public void sendExceptionMessage(OutputException exception, GameManager.PlayerColor target) {
+
     }
 
     public void unregisterPlayer(GameManager.PlayerColor color) {
@@ -39,8 +51,4 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
         }
     };
 
-    // void sendStatus(...);
-    public void sendExceptionMessage(Exception exception, GameManager.PlayerColor target) {
-
-    };
 }

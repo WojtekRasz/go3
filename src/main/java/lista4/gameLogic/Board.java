@@ -34,7 +34,7 @@ public class Board {
         board = new Field[boardSize][boardSize];
         for(int y = 0; y < boardSize; y++){
             for(int x = 0; x < boardSize; x++){
-                board[y][x] = new Field(x, y);
+                board[x][y] = new Field(x, y, this);
             }
         }
     }
@@ -60,9 +60,17 @@ public class Board {
         }
 
         board[x][y].putStone(stone);
+        for(Field neighbour: board[x][y].getNeighbours()){
+            if(neighbour == null) continue;
+
+            if(neighbour.getStone() != null){
+                neighbour.getStone().removeBreath(board[x][y]);
+            }
+        }
     }
 
     public Field getField(int x, int y){
+        if(!inBoardBoundries(x,y)) return null;
         return board[x][y];
     }
 
