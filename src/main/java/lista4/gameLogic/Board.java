@@ -27,7 +27,7 @@ public class Board {
         }
     }
 
-    private int boardSize = 19;
+    private final int boardSize = 19;
     private final Field[][] board;
 
     public Board() {

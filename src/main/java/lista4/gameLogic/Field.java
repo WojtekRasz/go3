@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Field {
     private Stone stone;
-    private Board board;
-    private int x;
-    private int y;
+    private final Board board;
+    private final int x;
+    private final int y;
 
     Field(int x, int y, Board board){
         this.board = board;
@@ -25,7 +25,7 @@ public class Field {
 
     public List<Field> getNeighbours(){
         ArrayList<Field> neighbours = new ArrayList<Field>();
-        int i = 0;
+
         for(Board.Direction direction : Board.Direction.values()){
             Field neighbour = board.getField(x + direction.getX(), y + direction.getY());
             if(neighbour == null) continue;
