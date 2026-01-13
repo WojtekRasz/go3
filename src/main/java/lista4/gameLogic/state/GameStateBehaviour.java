@@ -9,7 +9,7 @@ public interface GameStateBehaviour {
 
     void finishGame(GameContext context);
 
-    void pauseGame(GameContext context);
+    void startNegotiations(GameContext context);
 
     void resumeGame(GameContext context);
 }

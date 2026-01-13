@@ -2,10 +2,10 @@ package lista4.gameLogic.state;
 
 import lista4.gameLogic.GameContext;
 
-public class GamePaused implements GameStateBehaviour{
+public class Negotiations implements GameStateBehaviour{
     @Override
     public GameState getState() {
-        return GameState.GAME_PAUSED;
+        return GameState.NEGOTIATIONS;
     }
 
     @Override
@@ -19,7 +19,7 @@ public class GamePaused implements GameStateBehaviour{
     }
 
     @Override
-    public void pauseGame(GameContext context) {
+    public void startNegotiations(GameContext context) {
 
     }
 

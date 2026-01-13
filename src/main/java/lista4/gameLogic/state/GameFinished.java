@@ -19,7 +19,7 @@ public class GameFinished implements GameStateBehaviour{
     }
 
     @Override
-    public void pauseGame(GameContext context) {
+    public void startNegotiations(GameContext context) {
 
     }
 

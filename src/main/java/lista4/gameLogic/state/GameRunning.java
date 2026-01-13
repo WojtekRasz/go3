@@ -19,8 +19,8 @@ public class GameRunning implements GameStateBehaviour{
     }
 
     @Override
-    public void pauseGame(GameContext context) {
-        context.setGameState(GameState.GAME_PAUSED);
+    public void startNegotiations(GameContext context) {
+        context.setGameState(GameState.NEGOTIATIONS);
     }
 
     @Override
