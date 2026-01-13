@@ -7,8 +7,9 @@ public interface GameStateBehaviour {
 
     void startGame(GameContext context);
 
-    void stopGame(GameContext context);
+    void finishGame(GameContext context);
 
-    void nextPlayer(GameContext context);
-    // GameStateBehaviour changePlayer();
+    void pauseGame(GameContext context);
+
+    void resumeGame(GameContext context);
 }

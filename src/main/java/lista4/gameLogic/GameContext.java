@@ -4,6 +4,9 @@ import lista4.gameLogic.state.GameState;
 
 public class GameContext {
 
+    PlayerColor curPlayerColor;
+    int consecutivePasses;
+
     GameState curGameState;
 
     GameContext(GameState initialState) {
@@ -22,12 +25,32 @@ public class GameContext {
         curGameState.getStateBehaviour().startGame(this);
     }
 
-    public void endGame() {
-        curGameState.getStateBehaviour().stopGame(this);
+    public void stopGame() {
+        curGameState.getStateBehaviour().finishGame(this);
     }
 
     public void nextPlayer() {
-        curGameState.getStateBehaviour().nextPlayer(this);
+
+        curPlayerColor = curPlayerColor.other();
+    }
+
+    public PlayerColor getPlayerColor() {
+        return curPlayerColor;
+    }
+
+    public void setCurPlayerColor(PlayerColor playerColor) {
+        this.curPlayerColor = playerColor;
+    }
+
+    public void passNextPlayer() {
+        nextPlayer();
+        consecutivePasses++;
+    }
+    public int getConsecutivePasses() {
+        return consecutivePasses;
+    }
+    public void resetPasses(){
+        consecutivePasses = 0;
     }
 
 }

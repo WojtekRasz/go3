@@ -1,9 +1,10 @@
 package lista4.gameLogic.state;
 
 public enum GameState {
-    GAME_NOT_RUNNING(new WaitingState()),
-    BLACK_MOVE(new BlackMove()),
-    WHITE_MOVE(new WhiteMove());
+    GAME_NOT_INITIALIZED(new GameNotInitialized()),
+    GAME_RUNNING(new GameRunning()),
+    GAME_PAUSED(new GamePaused()),
+    GAME_FINISHED(new GameFinished()),;
 
     private final GameStateBehaviour gameStateBehaviour;
 

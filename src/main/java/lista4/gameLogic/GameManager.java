@@ -3,9 +3,7 @@ package lista4.gameLogic;
 import lista4.gameInterface.GameOutputAdapter;
 import lista4.gameLogic.gameExceptions.GameNotRunningException;
 import lista4.gameLogic.gameExceptions.OtherPlayersTurnException;
-import lista4.gameLogic.gameExceptions.OutputException;
 import lista4.gameLogic.state.GameState;
-import lista4.gameLogic.PlayerColor;
 
 public class GameManager {
 
@@ -19,7 +17,8 @@ public class GameManager {
     // techniczna------------------------------------------------------
 
     private GameManager() {
-        gameContext = new GameContext(GameState.GAME_NOT_RUNNING);
+        gameContext = new GameContext(GameState.GAME_NOT_INITIALIZED);
+        gameContext.setCurPlayerColor(PlayerColor.BLACK);
         board = new Board();
     }
 
@@ -50,9 +49,8 @@ public class GameManager {
         return board;
     }
 
-    public Board sendBoard(PlayerColor color) {
+    public void sendBoard(PlayerColor color) {
         outAdapter.sendBoard(board, color);
-        return board;
     }
     // ---------------------------------------Sekcja start/stop
     // gry--------------------------------------------------
@@ -63,40 +61,69 @@ public class GameManager {
     }
 
     public void endGame() {
-        gameContext.endGame();
+        gameContext.stopGame();
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
     }
 
     public void waitGame() {
-        gameContext.endGame();
+        gameContext.stopGame();
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
     }
 
     // ---------------------------------------Sekcja
     // ruchów---------------------------------------
+
+    private boolean isPlayersTurn(PlayerColor playerColor) {
+        // true if players' turn, false otherwise
+        return gameContext.getPlayerColor() == playerColor;
+    }
+
+    private Exception canMakeMove(PlayerColor playerColor) {
+        if (gameContext.getGameState() != GameState.GAME_RUNNING) {
+            return new GameNotRunningException("gra się nie rozpoczęła.");
+        }
+        if(!isPlayersTurn(playerColor)){
+            return new OtherPlayersTurnException(playerColor.other());
+        }
+        return null;
+    }
+
     public void makeMove(Move move) {
         try {
-            if (gameContext.getGameState() == GameState.GAME_NOT_RUNNING) {
-                throw new GameNotRunningException("gra się nie rozpoczęła.");
-            }
-            if (move.playerColor == PlayerColor.BLACK && gameContext.getGameState() == GameState.WHITE_MOVE) {
-                throw new OtherPlayersTurnException(PlayerColor.WHITE);
-            }
-            if (move.playerColor == PlayerColor.WHITE && gameContext.getGameState() == GameState.BLACK_MOVE) {
-                throw new OtherPlayersTurnException(PlayerColor.BLACK);
-            }
+            Exception canMakeMove = canMakeMove(move.playerColor);
+            if (canMakeMove != null) throw canMakeMove;
 
             Stone stone = new Stone(move.x, move.y, move.playerColor, board);
             board.putStone(move.x, move.y, stone);
 
             outAdapter.sendBoard(board, PlayerColor.BOTH);
+            gameContext.resetPasses();
 
             gameContext.nextPlayer();
 
             outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
-        } catch (OutputException e) {
+        } catch (Exception e) {
             outAdapter.sendExceptionMessage(e, move.playerColor);
         }
+
+    }
+
+    public void passMove(PlayerColor playerColor) {
+        try {
+            Exception canMakeMove = canMakeMove(playerColor);
+            if (canMakeMove != null) throw canMakeMove;
+
+            gameContext.passNextPlayer();
+            gameContext.stopGame();
+
+
+        } catch (Exception e) {
+            outAdapter.sendExceptionMessage(e, playerColor);
+        }
+    }
+
+    public void resumeGame(PlayerColor playerColor) {
+        gameContext.setCurPlayerColor(playerColor);
 
     }
 
