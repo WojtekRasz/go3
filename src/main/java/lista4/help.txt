@@ -104,3 +104,5 @@ Zamiast: if (stan == WAITING) w każdej metodzie Game. Użyj: currentStateBehavi
 dostosowanie GUIClient - lepiej zrobić aby ładniej było
 dodanie opcji poddanie się poddania się
 dodanie opcji pominięcia ruchu 
+dodanie do klientów ilość zbitych pionków
+    niech gra zawsze na początku, po zalogowaniu wysyła plansze

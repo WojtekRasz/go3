@@ -63,7 +63,12 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <artifactId>javafx-fxml</artifactId>
         <version>${javafx.version}</version>
     </dependency>
-
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>5.5.0</version>
+        <scope>test</scope>
+    </dependency>
 <!-- <dependency>
     <groupId>org.mariadb.jdbc</groupId>
     <artifactId>mariadb-java-client</artifactId>

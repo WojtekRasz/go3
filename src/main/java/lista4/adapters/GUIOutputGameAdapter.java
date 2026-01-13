@@ -11,12 +11,35 @@ import lista4.gameLogic.PlayerColor;
 import lista4.gameLogic.Stone;
 
 /**
- * Class uses Observers (ClientThread) to communicate with client
- * It is use in Game to send
+ * An implementation of {@link GameOutputAdapter} designed for GUI clients.
+ * <p>
+ * Unlike the console adapter, this class does not send visual text
+ * representations.
+ * Instead, it sends <b>structured protocol commands</b> that the client's GUI
+ * parser
+ * uses to update the graphical display.
+ * </p>
+ * <p>
+ * Responsibilities:
+ * <ul>
+ * <li>Managing connection streams for GUI clients.</li>
+ * <li>Sending state updates via protocol messages.</li>
+ * <li>Iterating through the board and sending {@code UPDATE} commands for every
+ * stone.</li>
+ * </ul>
+ * </p>
  */
 public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
+
+    /** Map of active writers for connected GUI clients. */
     private static final ConcurrentMap<PlayerColor, PrintWriter> activeWriters = new ConcurrentHashMap<>();
 
+    /**
+     * Registers a player and their output stream.
+     *
+     * @param color The player's color.
+     * @param out   The output stream for sending protocol commands.
+     */
     public void registerPlayer(PlayerColor color, PrintWriter out) {
         activeWriters.put(color, out);
         // out.println("Welcome " + color);
@@ -25,15 +48,31 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
         }
     }
 
+    /**
+     * Sends a game state update message.
+     *
+     * @param gameState The current state.
+     * @param target    The recipient.
+     */
     @Override
     public void sendState(GameState gameState, PlayerColor target) {
         sendToTarget("STATUS Gra trwa. Tura: " + gameState.toString(), target);
     }
 
+    /**
+     * Unregisters a player (e.g., on disconnect).
+     *
+     * @param color The player to remove.
+     */
     public void unregisterPlayer(PlayerColor color) {
         activeWriters.remove(color);
     }
 
+    /**
+     * Broadcasts a raw message string to all connected clients.
+     *
+     * @param message The message to send.
+     */
     public void sendBroadcast(String message) {
         for (PrintWriter out : activeWriters.values()) {
             if (out != null) {
@@ -42,6 +81,18 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
         }
     }
 
+    /**
+     * Synchronizes the client's board view with the server's board state.
+     * <p>
+     * This method iterates over the entire board and calls
+     * {@link #sendSpecificStoneUpdates}
+     * to send individual update commands for each stone found on the board.
+     * This allows the GUI to redraw or update its internal model.
+     * </p>
+     *
+     * @param board  The current game board.
+     * @param target The recipient (Specific player or BOTH).
+     */
     public void sendBoard(Board board, PlayerColor target) {
         if (target == PlayerColor.BOTH) {
             for (PrintWriter out : activeWriters.values()) {
@@ -55,12 +106,24 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
         }
     };
 
+    /**
+     * Sends an error message to a client.
+     *
+     * @param exception The exception details.
+     * @param target    The recipient.
+     */
     public void sendExceptionMessage(Exception exception, PlayerColor target) {
         PrintWriter out = activeWriters.get(target);
         out.println(exception.getMessage());
         out.println("blad");
     };
 
+    /**
+     * Routing helper for sending messages.
+     *
+     * @param message The message content.
+     * @param target  The recipient.
+     */
     private void sendToTarget(String message, PlayerColor target) {
         if (target == PlayerColor.BOTH) {
             sendBroadcast(message);
@@ -71,7 +134,16 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
         }
     }
 
-    // GUI
+    /**
+     * Iterates through the board and sends protocol commands to update stones.
+     * <p>
+     * The protocol format sent to the client is:
+     * {@code UPDATE [COLOR] [X] [Y]}
+     * </p>
+     *
+     * @param out   The output stream to send commands to.
+     * @param board The board data to serialize into commands.
+     */
     private void sendSpecificStoneUpdates(PrintWriter out, Board board) {
         // Najpierw czyścimy widok u klienta (opcjonalnie, zależy od logiki GUI)
         // out.println("CLEAR_BOARD");
@@ -87,5 +159,4 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
             }
         }
     }
-
 }

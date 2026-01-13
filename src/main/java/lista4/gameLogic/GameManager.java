@@ -50,6 +50,10 @@ public class GameManager {
         return board;
     }
 
+    public Board sendBoard(PlayerColor color) {
+        outAdapter.sendBoard(board, color);
+        return board;
+    }
     // ---------------------------------------Sekcja start/stop
     // gry--------------------------------------------------
 

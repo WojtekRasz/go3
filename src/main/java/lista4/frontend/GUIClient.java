@@ -10,6 +10,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -20,67 +21,52 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+/**
+ * The graphical client application for the Go game, built with JavaFX.
+ * <p>
+ * This class provides a visual interface for the game, featuring:
+ * <ul>
+ * <li>A {@link Canvas} based board for rendering the grid and stones.</li>
+ * <li>Interactive mouse controls for placing stones.</li>
+ * <li>Real-time updates handled by a background thread communicating with the
+ * server.</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Thread Safety: Since JavaFX is single-threaded for UI updates, this class
+ * uses
+ * {@link Platform#runLater(Runnable)} to process server messages that affect
+ * the GUI.
+ * </p>
+ */
 public class GUIClient extends Application {
+
     private static final String SERVER_ADDRESS = "127.0.0.1";
     private static final int PORT = 12345;
+
     private Socket socket;
     private PrintWriter out;
+
+    // UI Components
     private TextArea logArea;
     private Label playerInfoLabel;
     private Label blackCapturedLabel;
     private Label whiteCapturedLabel;
+    private BorderPane topBar;
     private Canvas boardCanvas;
+
     private final int BOARD_SIZE = 19;
     private final int CELL_SIZE = 30;
 
+    /**
+     * The main entry point for the JavaFX application.
+     * Initializes the UI components and starts the server connection process.
+     *
+     * @param primaryStage The primary stage for this application.
+     */
     @Override
     public void start(Stage primaryStage) {
-        playerInfoLabel = new Label("Czekanie na gracza...");
-        playerInfoLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-
-        // Informacje o pionkach
-        Circle blackIcon = new Circle(8, Color.BLACK);
-        blackCapturedLabel = new Label("0"); // zmienne z ClientThread które wyświetlą ilość posiadanych pionków itp
-        Circle whiteIcon = new Circle(8, Color.WHITE);
-        whiteIcon.setStroke(Color.BLACK);
-        whiteCapturedLabel = new Label("0");
-
-        HBox scoreBox = new HBox(10, playerInfoLabel, blackIcon, blackCapturedLabel, whiteIcon, whiteCapturedLabel);
-        scoreBox.setAlignment(Pos.CENTER_LEFT);
-        scoreBox.setPadding(new Insets(10));
-
-        // Przyciski
-        Button passButton = new Button("Pomiń ruch");
-        passButton.setOnAction(e -> sendCommand("pass"));
-
-        Button resignButton = new Button("Poddaj się");
-        resignButton.setOnAction(e -> sendCommand("resign"));
-
-        HBox buttonBox = new HBox(10, passButton, resignButton);
-        buttonBox.setAlignment(Pos.CENTER_RIGHT);
-        buttonBox.setPadding(new Insets(10));
-
-        BorderPane topBar = new BorderPane();
-        topBar.setLeft(scoreBox);
-        topBar.setRight(buttonBox);
-        topBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-border-width: 0 0 1 0;");
-        // --- Budowa Interfejsu ---
-        logArea = new TextArea();
-        logArea.setEditable(false);
-        logArea.setPrefHeight(10);
-        logArea.setStyle("-fx-font-size: 13px;");
-        boardCanvas = new Canvas(BOARD_SIZE * CELL_SIZE, BOARD_SIZE * CELL_SIZE);
-        drawGrid();
-        // Obsługa kliknięcia w planszę
-        boardCanvas.setOnMouseClicked(event -> {
-            int x = (int) (event.getX() / CELL_SIZE);
-            int y = (int) (event.getY() / CELL_SIZE) + 1;
-            char column = (char) ('a' + x);
-
-            String command = column + " " + y;
-            sendCommand(command);
-        });
-
+        initComponents();
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(boardCanvas);
@@ -91,29 +77,98 @@ public class GUIClient extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // --- Połączenie z serwerem ---
+        // --- Connect to server in background ---
         connectToServer(primaryStage);
     }
 
-    // z Client.java z main łączenie z serwerem
+    /**
+     * Initializes all graphical components (Buttons, Labels, Canvas) and event
+     * listeners.
+     */
+    public void initComponents() {
+        playerInfoLabel = new Label("Czekanie na gracza...");
+        playerInfoLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        // Score / Captures info
+        Circle blackIcon = new Circle(8, Color.BLACK);
+        blackCapturedLabel = new Label("0");
+        Circle whiteIcon = new Circle(8, Color.WHITE);
+        whiteIcon.setStroke(Color.BLACK);
+        whiteCapturedLabel = new Label("0");
+
+        HBox scoreBox = new HBox(10, playerInfoLabel, blackIcon, blackCapturedLabel, whiteIcon, whiteCapturedLabel);
+        scoreBox.setAlignment(Pos.CENTER_LEFT);
+        scoreBox.setPadding(new Insets(10));
+
+        // Control Buttons
+        Button passButton = new Button("Pomiń ruch");
+        passButton.setOnAction(e -> sendCommand("pass"));
+
+        Button resignButton = new Button("Poddaj się");
+        resignButton.setOnAction(e -> sendCommand("resign"));
+
+        HBox buttonBox = new HBox(10, passButton, resignButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.setPadding(new Insets(10));
+
+        topBar = new BorderPane();
+        topBar.setLeft(scoreBox);
+        topBar.setRight(buttonBox);
+        topBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-border-width: 0 0 1 0;");
+
+        // Log Area
+        logArea = new TextArea();
+        logArea.setEditable(false);
+        logArea.setPrefHeight(10);
+        logArea.setStyle("-fx-font-size: 13px;");
+
+        // Game Board
+        boardCanvas = new Canvas(BOARD_SIZE * CELL_SIZE, BOARD_SIZE * CELL_SIZE);
+        drawGrid();
+
+        // Mouse Click Handler: Converts pixels to Grid Coordinates
+        boardCanvas.setOnMouseClicked(event -> {
+            int x = (int) (event.getX() / CELL_SIZE);
+            int y = (int) (event.getY() / CELL_SIZE) + 1;
+            char column = (char) ('a' + x);
+
+            String command = column + " " + y;
+            sendCommand(command);
+        });
+    }
+
+    /**
+     * Establishes a socket connection to the server in a separate thread.
+     * <p>
+     * Sends the "GUI" handshake immediately upon connection.
+     * </p>
+     *
+     * @param stage The main application stage, used for updating the title.
+     */
     private void connectToServer(Stage stage) {
         new Thread(() -> {
             try {
                 socket = new Socket(SERVER_ADDRESS, PORT);
                 out = new PrintWriter(socket.getOutputStream(), true);
 
-                Platform.runLater(() -> logArea.setText("Połączono z serwerem!\n"));
-
                 Thread listener = new Thread(new ServerListener(socket, stage));
-                listener.setDaemon(true); // Zamknie się razem z aplikacją
+                listener.setDaemon(true); // Ensures thread dies when app closes
                 listener.start();
-                out.println("GUI"); // print GUI to know which adapter to use
+
+                out.println("GUI"); // Handshake: Request GUI protocol
+                out.println("GETBOARD"); // Request initial state
+
             } catch (IOException e) {
                 Platform.runLater(() -> logArea.setText("Błąd połączenia: " + e.getMessage() + "\n"));
             }
         }).start();
     }
 
+    /**
+     * Sends a raw command string to the server.
+     *
+     * @param cmd The command to send (e.g., "a 10", "pass").
+     */
     private void sendCommand(String cmd) {
         if (out != null) {
             out.println(cmd);
@@ -121,17 +176,19 @@ public class GUIClient extends Application {
         }
     }
 
+    /**
+     * Draws the background grid of the Go board using {@link GraphicsContext}.
+     */
     private void drawGrid() {
         GraphicsContext gc = boardCanvas.getGraphicsContext2D();
-        gc.setFill(Color.web("#DEB887")); // Kolor BurlyWood (ładny beżowy/drewniany)
+        gc.setFill(Color.web("#DEB887")); // BurlyWood color
         gc.fillRect(0, 0, boardCanvas.getWidth(), boardCanvas.getHeight());
 
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
 
         for (int i = 0; i < BOARD_SIZE; i++) {
-            double offset = CELL_SIZE / 2.0;
-            // Linie poziome i pionowe
+            // Draw horizontal and vertical lines
             gc.strokeLine(CELL_SIZE / 2.0, CELL_SIZE / 2.0 + i * CELL_SIZE, (BOARD_SIZE - 0.5) * CELL_SIZE,
                     CELL_SIZE / 2.0 + i * CELL_SIZE);
             gc.strokeLine(CELL_SIZE / 2.0 + i * CELL_SIZE, CELL_SIZE / 2.0, CELL_SIZE / 2.0 + i * CELL_SIZE,
@@ -139,26 +196,38 @@ public class GUIClient extends Application {
         }
     }
 
+    /**
+     * Renders a stone at specific grid coordinates.
+     *
+     * @param x     The X grid coordinate (0-18).
+     * @param y     The Y grid coordinate (0-18).
+     * @param color The color of the stone (Black or White).
+     */
     public void drawStone(int x, int y, Color color) {
+        if (boardCanvas == null)
+            return;
         GraphicsContext gc = boardCanvas.getGraphicsContext2D();
 
-        double radius = CELL_SIZE * 0.4; // Kamień nieco mniejszy niż pole
-        // Środek przecięcia linii:
+        double radius = CELL_SIZE * 0.4;
         double centerX = CELL_SIZE / 2.0 + x * CELL_SIZE;
-        double centerY = CELL_SIZE / 2.0 + y * CELL_SIZE; // (BOARD_SIZE-1-y) dopasowuje y do układu
-                                                          // GUI
+        double centerY = CELL_SIZE / 2.0 + y * CELL_SIZE;
 
         gc.setFill(color);
-        // Rysujemy kółko
         gc.fillOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
 
-        // Opcjonalnie: obramowanie kamienia dla lepszej widoczności
+        // Optional: stroke for better visibility
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(0.5);
         gc.strokeOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
     }
 
-    // Wewnętrzna klasa słuchacza, zmodyfikowana pod GUI
+    /**
+     * A background task that listens for messages from the server.
+     * <p>
+     * It is responsible for parsing protocol commands (e.g., "UPDATE BLACK 10 10")
+     * and scheduling UI updates on the JavaFX Application Thread.
+     * </p>
+     */
     private class ServerListener implements Runnable {
         private final Socket socket;
         private final Stage stage;
@@ -172,26 +241,28 @@ public class GUIClient extends Application {
         public void run() {
             try (Scanner in = new Scanner(socket.getInputStream())) {
                 String name;
+                // Read assigned player color/name
                 if (in.hasNextLine()) {
                     name = in.nextLine();
-                    // stage.setTitle("Go Client - " + name);
                     Platform.runLater(() -> {
                         playerInfoLabel.setText("Grasz jako: " + name);
                         stage.setTitle("Go Client - " + name);
                     });
                 }
+
+                // Main Loop
                 while (in.hasNextLine()) {
                     String message = in.nextLine();
 
+                    // All UI updates must happen inside Platform.runLater
                     Platform.runLater(() -> {
                         logArea.setText("" + message + "\n");
 
-                        // parser komunikatów z serwera
+                        // Protocol Parser
                         if (message.equals("CLEAR_BOARD")) {
-                            drawGrid(); // Przerysowuje czystą planszę (beż + linie)
+                            drawGrid();
                         } else if (message.startsWith("UPDATE")) {
                             try {
-
                                 String[] parts = message.split(" ");
                                 String colorStr = parts[1];
                                 int x = Integer.parseInt(parts[2]);
@@ -207,7 +278,6 @@ public class GUIClient extends Application {
                 }
             } catch (Exception e) {
                 Platform.runLater(() -> logArea.setText("Utracono połączenie.\n"));
-
             }
         }
     }
