@@ -145,6 +145,10 @@ public class GameManager {
         gameContext.resumeGame();
     }
 
+    public void proposeFinishNegotiation(PlayerColor playerColor) {
+        outAdapter.sendEndOfNegotiationToPlayer(playerColor.other());
+    }
+
     public void finishNegotiation(){
         PlayerColor winner = calculateWining();
         outAdapter.sendWiningMassage(winner, gameContext.whitePoints(), gameContext.blackPoints(), false);

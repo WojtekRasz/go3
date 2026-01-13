@@ -47,5 +47,22 @@ public interface GameInputAdapter<InputType> {
      *
      * @param color The player who needs the board update.
      */
-    void sendBoard(PlayerColor color);
+    void sendBoardRequest(PlayerColor color);
+
+
+    void sendChangingTeritory(InputType input);
+
+    /**
+     * Pass move and
+     *
+     * @param color Player who pass move
+     */
+    void sendPass(PlayerColor color);
+
+    /**
+     * Give up
+     *
+     * @param color Player who gives up
+     */
+    void sendGiveUp(PlayerColor color);
 }

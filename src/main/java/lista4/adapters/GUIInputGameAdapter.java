@@ -85,7 +85,19 @@ public class GUIInputGameAdapter implements GameInputAdapter<String> {
      * @param color The player requesting the board update (or responsible for the
      *              trigger).
      */
-    public void sendBoard(PlayerColor color) {
+    public void sendBoardRequest(PlayerColor color) {
         gameManager.sendBoard(color);
     };
+
+    public void sendChangingTeritory(String input) {
+    }
+
+    public void sendPass(PlayerColor color) {
+        gameManager.passMove(color);
+    }
+
+    public void sendGiveUp(PlayerColor color) {
+        gameManager.giveUpGame(color);
+    }
+
 }

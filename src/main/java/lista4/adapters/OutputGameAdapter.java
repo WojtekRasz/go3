@@ -150,4 +150,16 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
                 out.println(message);
         }
     }
+
+    public void sendWiningMassage(PlayerColor playerColor, int whiteStones, int blackStones, boolean byGivingUp) {
+    }
+
+    public void sendCurrentPlayer(PlayerColor playerColor) {
+    }
+
+    public void sendNegotiationStart() {
+    }
+
+    public void sendEndOfNegotiationToPlayer(PlayerColor playerColor) {
+    }
 }

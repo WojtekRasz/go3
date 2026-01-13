@@ -83,5 +83,7 @@ public interface GameOutputAdapter<OutputType> {
 
     void sendCurrentPlayer(PlayerColor playerColor);
 
-    void sendPauseGame();
+    void sendNegotiationStart();
+
+    void sendEndOfNegotiationToPlayer(PlayerColor playerColor);
 }

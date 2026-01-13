@@ -106,6 +106,6 @@ class ClientThreadTest {
         verify(mockGuiOutAdapter).registerPlayer(eq(PlayerColor.BLACK), any(PrintWriter.class));
 
         // Verification of the board request call on the GUI input adapter
-        verify(inAdapters.get(0)).sendBoard(PlayerColor.BLACK);
+        verify(inAdapters.get(0)).sendBoardRequest(PlayerColor.BLACK);
     }
 }

@@ -1,3 +1,4 @@
+
 package lista4.adapters;
 
 import lista4.gameInterface.GameInputAdapter;
@@ -82,7 +83,20 @@ public class InputGameAdapter implements GameInputAdapter<String> {
      *
      * @param color The player for whom the board is being refreshed.
      */
-    public void sendBoard(PlayerColor color) {
+    public void sendBoardRequest(PlayerColor color) {
         gameManager.sendBoard(color);
     };
+
+    public void sendChangingTeritory(String input) {
+
+    }
+
+    public void sendPass(PlayerColor color) {
+        gameManager.passMove(color);
+    }
+
+    public void sendGiveUp(PlayerColor color) {
+        gameManager.giveUpGame(color);
+    }
+
 }

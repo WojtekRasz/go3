@@ -115,7 +115,7 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
     public void sendExceptionMessage(Exception exception, PlayerColor target) {
         PrintWriter out = activeWriters.get(target);
         out.println(exception.getMessage());
-        out.println("blad");
+        // out.println("blad");
     };
 
     /**
@@ -158,5 +158,17 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
                 }
             }
         }
+    }
+
+    public void sendWiningMassage(PlayerColor playerColor, int whiteStones, int blackStones, boolean byGivingUp) {
+    }
+
+    public void sendCurrentPlayer(PlayerColor playerColor) {
+    }
+
+    public void sendNegotiationStart() {
+    }
+
+    public void sendEndOfNegotiationToPlayer(PlayerColor playerColor) {
     }
 }
