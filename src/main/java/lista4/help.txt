@@ -106,3 +106,8 @@ dodanie opcji poddanie się poddania się
 dodanie opcji pominięcia ruchu 
 dodanie do klientów ilość zbitych pionków
     niech gra zawsze na początku, po zalogowaniu wysyła plansze
+Krzesi:
+usupełnienie konsoli
+
+meteda do skipowania
+meteda do giveup

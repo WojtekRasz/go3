@@ -19,6 +19,8 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -57,6 +59,11 @@ public class GUIClient extends Application {
 
     private final int BOARD_SIZE = 19;
     private final int CELL_SIZE = 30;
+
+    private boolean isNegotiationMode = false;
+    private String myPlayerColor = "UNKNOWN";
+
+    private List<String> markedFields = new ArrayList<>();
 
     /**
      * The main entry point for the JavaFX application.
@@ -129,12 +136,51 @@ public class GUIClient extends Application {
         // Mouse Click Handler: Converts pixels to Grid Coordinates
         boardCanvas.setOnMouseClicked(event -> {
             int x = (int) (event.getX() / CELL_SIZE);
-            int y = (int) (event.getY() / CELL_SIZE) + 1;
-            char column = (char) ('a' + x);
+            int y = (int) (event.getY() / CELL_SIZE);
+            if (x >= BOARD_SIZE || y >= BOARD_SIZE)
+                return;
 
-            String command = column + " " + y;
-            sendCommand(command);
+            if (isNegotiationMode) {
+                // --- NOWA LOGIKA ---
+                String fieldId = x + "," + y;
+                if (!markedFields.contains(fieldId)) {
+                    drawMarker(x, y, Color.GREEN); // Zaznacz na zielono
+                    markedFields.add(x + "," + y); // Dodaj do tablicy
+                    String command = "PROP " + myPlayerColor + " " + x + " " + y;
+                    sendCommand(command);
+
+                } else {
+
+                }
+
+                // Formatowanie i wysyłanie: PROP COLOR X Y
+            } else {
+                // --- STARA LOGIKA ---
+                char column = (char) ('a' + x);
+                String command = column + " " + (y + 1);
+                sendCommand(command);
+            }
         });
+    }
+
+    /**
+     * Rysuje znacznik (np. zielony) na polu.
+     */
+    public void drawMarker(int x, int y, Color color) {
+        if (boardCanvas == null)
+            return;
+        GraphicsContext gc = boardCanvas.getGraphicsContext2D();
+
+        double size = CELL_SIZE * 0.5; // Rozmiar znacznika (kwadrat lub kółko)
+        double centerX = CELL_SIZE / 2.0 + x * CELL_SIZE;
+        double centerY = CELL_SIZE / 2.0 + y * CELL_SIZE;
+
+        gc.setFill(new Color(0, 1, 0, 0.6)); // Zielony z przezroczystością
+        gc.fillRect(centerX - size / 2, centerY - size / 2, size, size);
+
+        gc.setStroke(Color.GREEN);
+        gc.setLineWidth(2);
+        gc.strokeRect(centerX - size / 2, centerY - size / 2, size, size);
     }
 
     /**
@@ -172,6 +218,7 @@ public class GUIClient extends Application {
     private void sendCommand(String cmd) {
         if (out != null) {
             out.println(cmd);
+            System.out.println(cmd);
             logArea.setText("Wysłano: " + cmd + "\n");
         }
     }
@@ -244,6 +291,7 @@ public class GUIClient extends Application {
                 // Read assigned player color/name
                 if (in.hasNextLine()) {
                     name = in.nextLine();
+                    myPlayerColor = name.contains("BLACK") ? "BLACK" : "WHITE";
                     Platform.runLater(() -> {
                         playerInfoLabel.setText("Grasz jako: " + name);
                         stage.setTitle("Go Client - " + name);
@@ -258,8 +306,14 @@ public class GUIClient extends Application {
                     Platform.runLater(() -> {
 
                         // Protocol Parser
+                        // 1. Wykrycie zmiany stanu gry na GAME_NOT_RUNNING (Tryb zaznaczania)
+                        if (message.contains("GAME_NOT_RUNNING") || message.contains("DEAD_STONE_MODE")) {
+                            isNegotiationMode = true;
+                            logArea.appendText("SYSTEM: Tryb zaznaczania martwych grup.\n");
+                        }
                         if (message.equals("CLEAR_BOARD")) {
                             drawGrid();
+                            markedFields.clear();
                         } else if (message.startsWith("UPDATE")) {
                             try {
                                 String[] parts = message.split(" ");

@@ -66,6 +66,9 @@ public class Server {
     /** Input adapter for GUI clients. */
     private static GameInputAdapter GUIinAdapter = new GUIInputGameAdapter(gameManager, GUIoutAdapter);
 
+    public static ArrayList<GameInputAdapter> inputAdapters = new ArrayList<>();
+    public static ArrayList<GameOutputAdapter> outputAdapters = new ArrayList<>();
+
     /**
      * The main method that starts the server.
      * <p>
@@ -95,8 +98,6 @@ public class Server {
         System.out.println("Wielowątkowy serwer jest uruchomiony na porcie " + PORT + "...");
 
         // Prepare adapter lists to allow ClientThread to switch between Console/GUI
-        ArrayList<GameInputAdapter> inputAdapters = new ArrayList<>();
-        ArrayList<GameOutputAdapter> outputAdapters = new ArrayList<>();
 
         inputAdapters.add(GUIinAdapter);
         inputAdapters.add(inAdapter);
