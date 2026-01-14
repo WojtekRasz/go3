@@ -155,6 +155,7 @@ public class GameManager {
         return PlayerColor.BOTH;
     }
 
+    //Robi ruchy
     public void makeMove(Move move) {
         try {
             Exception canMakeMove = canMakeMove(move.playerColor);
@@ -201,6 +202,7 @@ public class GameManager {
         }
     }
 
+    //Wznawia gre po nieudanych negocjacjach. Ustawia ture gracza na przeciwnika tego co przerwał
     public void resumeGame(PlayerColor playerColor) {
         gameContext.setCurPlayerColor(playerColor.other());
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
@@ -209,10 +211,12 @@ public class GameManager {
         gameContext.resumeGame();
     }
 
+    //Uruchamiane gdy jeden z graczy zakończył negocjacje i czeka na drugiego
     public void proposeFinishNegotiation(PlayerColor playerColor) {
         outAdapter.sendEndOfNegotiationToPlayer(playerColor.other());
     }
 
+    //Gdy 2 się zgodzi negocjacje się kończą
     public void finishNegotiation() {
         PlayerColor winner = calculateWining();
         outAdapter.sendWiningMassage(winner, gameContext.whitePoints(), gameContext.blackPoints(), false);
@@ -220,12 +224,14 @@ public class GameManager {
         gameContext.finishGame();
     }
 
+    //Poddaj gre
     public void giveUpGame(PlayerColor playerColor) {
         outAdapter.sendWiningMassage(playerColor.other(), 0, 0, true);
 
         gameContext.finishGame();
     }
 
+    //Dodaj terytorium
     public void addTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
             outAdapter.sendExceptionMessage(new NegotiationsNotPresent(""), playerColor);
