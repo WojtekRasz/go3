@@ -42,6 +42,7 @@ public class Board {
     }
 
     private boolean ko;
+    private Stone koStone;
 
     private final int boardSize = 19;
     private final Field[][] board;
@@ -139,8 +140,12 @@ public class Board {
         boolean hasCaptured = false;
 
         if(!stonesChainsToCapture.isEmpty() && ko){
-            removeStone(x, y) ;
-            throw new CaptureInKoException();
+            for(StoneChain stonesChain : stonesChainsToCapture) {
+                if(stonesChain.getStones().contains(koStone)) {
+                    removeStone(x, y) ;
+                    throw new CaptureInKoException();
+                }
+            }
         }
 
         boolean suicide = checkSuicide(friendlyNeighbourChain, stone);
@@ -162,6 +167,8 @@ public class Board {
 
         else {
             ko = suicide;
+            if(ko) koStone = stone;
+            else koStone = null;
 
             stone.setChain(new StoneChain(stone));
             for(StoneChain stonesChain : friendlyNeighbourChain) {
