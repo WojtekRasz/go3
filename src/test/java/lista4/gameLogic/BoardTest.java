@@ -1,6 +1,6 @@
 package lista4.gameLogic;
 
-import lista4.gameLogic.gameExceptions.FieldNotInBoardException;
+import lista4.gameLogic.gameExceptions.FieldOcupiedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +39,7 @@ class BoardTest {
         board.putStone(1, 1,
                 new Stone(1, 1, PlayerColor.BLACK, board));
 
-        assertThrows(FieldNotInBoardException.class, () -> board.putStone(1, 1,
+        assertThrows(FieldOcupiedException.class, () -> board.putStone(1, 1,
                 new Stone(1, 1, PlayerColor.WHITE, board)));
     }
 

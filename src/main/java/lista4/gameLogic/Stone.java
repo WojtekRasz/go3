@@ -35,17 +35,24 @@ public class Stone {
     public void setChain(StoneChain chain) { this.chain = chain; }
     public StoneChain getChain() { return chain; }
 
-    public Set<Field> getBreaths() { return breaths; }
+    public Set<Field> getBreaths() {
+        updateBreaths();
+        return breaths;
+    }
 
     // update breaths po ruchu
     public void updateBreaths() {
         breaths.clear();
-        for (Field n : field.getNeighbours()) {
-            if (n.getStone() == null) breaths.add(n);
+        for (Field neighbour : field.getNeighbours()) {
+            if (neighbour.getStone() == null) breaths.add(neighbour);
         }
     }
 
     public PlayerColor getPlayerColor() {
         return playerColor;
     }
+
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public Board getBoard() { return board; }
 }

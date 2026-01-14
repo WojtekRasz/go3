@@ -21,14 +21,22 @@ public class StoneChain {
 
     public int getBreathCount() {
         Set<Field> breaths = new HashSet<>();
-        for (Stone s : stones) {
-            breaths.addAll(s.getBreaths());
+        for (Stone stoneElement : stones) {
+            breaths.addAll(stoneElement.getBreaths());
         }
         return breaths.size();
     }
 
     public boolean isDead() {
         return getBreathCount() == 0;
+    }
+
+    public void captureChain(){
+        for(Stone stone : stones){
+            int x = stone.getX();
+            int y = stone.getY();
+            stone.getBoard().removeStone(x, y);
+        }
     }
 
     public Set<Stone> getStones() { return stones; }
