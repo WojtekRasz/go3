@@ -46,6 +46,7 @@ public class Stone {
     public Stone(int x, int y, PlayerColor playerColor, Board board) throws IllegalStoneOfBothColorsException {
         this.x = x;
         this.y = y;
+        this.chain = new StoneChain(this);
 
         if (playerColor == PlayerColor.BOTH) {
             throw new IllegalStoneOfBothColorsException();

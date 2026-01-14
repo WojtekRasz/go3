@@ -51,6 +51,7 @@ public class Board {
      * Initializes a new empty board with {@code boardSize} x {@code boardSize} fields.
      */
     public Board() {
+        ko = false;
         board = new Field[boardSize][boardSize];
         for (int y = 0; y < boardSize; y++) {
             for (int x = 0; x < boardSize; x++) {
@@ -96,7 +97,7 @@ public class Board {
      */
     public boolean checkSuicide(Set<StoneChain> chains, Stone stone){
         int allBreaths = 0;
-        allBreaths += stone.getBreaths().size();
+        allBreaths += stone.getChain().getBreathCount();
         for(StoneChain stonesChain : chains) {
             allBreaths += stonesChain.getBreathCount();
         }
@@ -135,16 +136,32 @@ public class Board {
             }
         }
 
-        boolean suicide = checkSuicide(friendlyNeighbourChain, stone);
+        boolean hasCaptured = false;
 
-        if(stonesChainsToCapture.isEmpty() && suicide) {
-            removeStone(x, y) ;
-            throw new SuicideException(new Move(x, y, stone.getPlayerColor()));
-        }
-        else if(!stonesChainsToCapture.isEmpty() && ko){
+        if(!stonesChainsToCapture.isEmpty() && ko){
             removeStone(x, y) ;
             throw new CaptureInKoException();
         }
+
+        boolean suicide = checkSuicide(friendlyNeighbourChain, stone);
+
+        if(!ko){
+
+            for(StoneChain stonesChain : stonesChainsToCapture) {
+                stonesChain.captureChain();
+                System.out.println("BICIE");
+                hasCaptured = true;
+            }
+        }
+
+        if(hasCaptured) suicide = checkSuicide(friendlyNeighbourChain, stone);
+
+        if(!hasCaptured && suicide) {
+            System.out.println("SAMOBÓJSTWO");
+            removeStone(x, y) ;
+            throw new SuicideException(new Move(x, y, stone.getPlayerColor()));
+        }
+
         else {
             ko = suicide;
 
@@ -152,14 +169,7 @@ public class Board {
             for(StoneChain stonesChain : friendlyNeighbourChain) {
                 stone.getChain().merge(stonesChain);
             }
-
-            for(StoneChain stonesChain : stonesChainsToCapture) {
-                stone.getChain().captureChain();
-            }
-
         }
-
-
     }
 
     /**
