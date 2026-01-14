@@ -87,6 +87,15 @@ public class InputGameAdapter implements GameInputAdapter<String> {
         gameManager.sendBoard(color);
     };
 
+    /**
+     * Handles commands related to proposing territory changes during negotiation.
+     *
+     * Parses commands starting with "PROP".
+     * Format: "PROP + [coord]" to add, "PROP - [coord]" to remove.
+     *
+     * @param input The raw input string.
+     * @param color The player sending the proposal.
+     */
     public void sendChangingTeritory(String input, PlayerColor color) {
         if (input.matches("PROP [+-] [a-sA-S] [1-9]") || input.matches("PROP [+-] [a-sA-S] 1[0-9]")) {
             String[] parts = input.split(" ");
@@ -106,12 +115,48 @@ public class InputGameAdapter implements GameInputAdapter<String> {
         }
     }
 
+    /**
+     * Signals that the player wishes to pass their turn.
+     *
+     * @param color The player passing.
+     */
     public void sendPass(PlayerColor color) {
         gameManager.passMove(color);
     }
 
+    /**
+     * Signals that the player wishes to resign (give up) the game.
+     *
+     * @param color The player resigning.
+     */
     public void sendGiveUp(PlayerColor color) {
         gameManager.giveUpGame(color);
     }
 
+    /**
+     * Signals a request to resume the game (typically rejecting a negotiation).
+     *
+     * @param color The player requesting to resume.
+     */
+    public void sendResumeGame(PlayerColor color) {
+        gameManager.resumeGame(color);
+    }
+
+    /**
+     * Proposes to finish the negotiation phase (submit current proposal).
+     *
+     * @param color The player submitting the proposal.
+     */
+    public void proposeFinishNegotiation(PlayerColor color) {
+        gameManager.proposeFinishNegotiation(color);
+    }
+
+    /**
+     * Accepts the opponent's negotiation proposal, finalizing the game.
+     *
+     * @param color The player accepting the proposal.
+     */
+    public void acceptFinishNegotiation(PlayerColor color) {
+        gameManager.finishNegotiation(color);
+    }
 }

@@ -27,6 +27,9 @@ public class GameManager {
     /** Adapter used to send updates to clients (GUI/console) */
     private GameOutputAdapter outAdapter;
 
+    /** Player who send the proposition to end negotiations */
+    private PlayerColor colorOfProposal;
+
     /**
      * Private constructor for singleton pattern.
      * Initializes the board and sets the initial player.
@@ -155,7 +158,7 @@ public class GameManager {
         return PlayerColor.BOTH;
     }
 
-    //Robi ruchy
+    // Robi ruchy
     public void makeMove(Move move) {
         try {
             Exception canMakeMove = canMakeMove(move.playerColor);
@@ -202,36 +205,44 @@ public class GameManager {
         }
     }
 
-    //Wznawia gre po nieudanych negocjacjach. Ustawia ture gracza na przeciwnika tego co przerwał
+    // Wznawia gre po nieudanych negocjacjach. Ustawia ture gracza na przeciwnika
+    // tego co przerwał
     public void resumeGame(PlayerColor playerColor) {
+
         gameContext.setCurPlayerColor(playerColor.other());
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
-        outAdapter.sendCurrentPlayer(playerColor);
+        outAdapter.sendBroadcast("RESUME_GAME");
+        outAdapter.resumeGame(board);
         gameContext.clearTerritories();
         gameContext.resumeGame();
+        outAdapter.sendCurrentPlayer(playerColor.other());
     }
 
-    //Uruchamiane gdy jeden z graczy zakończył negocjacje i czeka na drugiego
+    // Uruchamiane gdy jeden z graczy zakończył negocjacje i czeka na drugiego
     public void proposeFinishNegotiation(PlayerColor playerColor) {
         outAdapter.sendEndOfNegotiationToPlayer(playerColor.other());
+        colorOfProposal = playerColor;
     }
 
-    //Gdy 2 się zgodzi negocjacje się kończą
-    public void finishNegotiation() {
-        PlayerColor winner = calculateWining();
-        outAdapter.sendWiningMassage(winner, gameContext.whitePoints(), gameContext.blackPoints(), false);
-
-        gameContext.finishGame();
+    // Gdy 2 się zgodzi negocjacje się kończą
+    public void finishNegotiation(PlayerColor color) {
+        if (colorOfProposal != color) {
+            PlayerColor winner = calculateWining();
+            outAdapter.sendWiningMassage(winner, gameContext.whitePoints(), gameContext.blackPoints(), false);
+            gameContext.finishGame();
+        } else {
+            outAdapter.sendToTarget("To jest Twoja propozycja", color);
+        }
     }
 
-    //Poddaj gre
+    // Poddaj gre
     public void giveUpGame(PlayerColor playerColor) {
         outAdapter.sendWiningMassage(playerColor.other(), 0, 0, true);
 
         gameContext.finishGame();
     }
 
-    //Dodaj terytorium
+    // Dodaj terytorium
     public void addTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
             outAdapter.sendExceptionMessage(new NegotiationsNotPresent(""), playerColor);

@@ -13,6 +13,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -59,17 +60,21 @@ public class GUIClient extends Application {
 
     private Button passButton;
     private Button resignButton;
-    private Button acceptButton; // Przycisk do akceptacji terytorium
-    private Button resumeButton; // Przycisk do wznowienia gry (jeśli nie zgadzamy się)
+    private Button propositionButton; // Sends a territory proposition
+    private Button resumeButton; // Resumes the game (rejects negotiation start)
+    private Button acceptProposalButton; // Accepts the opponent's territory arrangement
+    private Button rejectProposalButton; // Rejects the opponent's arrangement
 
     private final int BOARD_SIZE = 19;
     private final int CELL_SIZE = 30;
 
     private boolean isNegotiationMode = false;
+    private boolean isPuttingPossible = false;// Controls if clicks send moves or negotiation markers
     private String myPlayerColor = "UNKNOWN";
 
     private List<String> markedBlackFields = new ArrayList<>();
     private List<String> markedWhiteFields = new ArrayList<>();
+    // Local cache of the board state to redraw cells correctly
     private Color[][] boardState = new Color[BOARD_SIZE][BOARD_SIZE];
 
     /**
@@ -121,24 +126,47 @@ public class GUIClient extends Application {
         resignButton = new Button("Poddaj się");
         resignButton.setOnAction(e -> sendCommand("GIVE UP"));
 
-        acceptButton = new Button("Zatwierdź terytorium");
-        // acceptButton.setStyle("-fx-background-color: lightgreen;"); // Opcjonalny
-        // styl
-        acceptButton.setVisible(false); // Domyślnie ukryty
-        acceptButton.setManaged(false); // Domyślnie nie zajmuje miejsca
-        // UWAGA: Sprawdź jaką komendę serwer oczekuje na akceptację (np. "ACCEPT",
-        // "DONE", "AGREE")
-        acceptButton.setOnAction(e -> sendCommand("ACCEPT"));
+        propositionButton = new Button("zaproponuj terytorium");
+        propositionButton.setVisible(false); // Domyślnie ukryty
+        propositionButton.setManaged(false); // Domyślnie nie zajmuje miejsca
+        propositionButton.setOnAction(e -> sendCommand("PROPOSITION"));
 
         resumeButton = new Button("Wznów grę");
         // resumeButton.setStyle("-fx-background-color: lightcoral;");
         resumeButton.setVisible(false);
         resumeButton.setManaged(false);
-        // UWAGA: Sprawdź komendę na odrzucenie/wznowienie (np. "RESUME", "PLAY")
+        acceptProposalButton = new Button("Zaakceptuj układ");
+        acceptProposalButton.setStyle("-fx-background-color: lightgreen; -fx-text-fill: black;"); // Zielony dla
+                                                                                                  // akceptacji
+        acceptProposalButton.setVisible(false);
+        acceptProposalButton.setManaged(false);
+        acceptProposalButton.setOnAction(e -> {
+            sendCommand("ACCEPT"); // Wysyłamy zgodę
+            setResponseModeUI(false); // Ukrywamy przyciski po kliknięciu
+            isPuttingPossible = false;
+        });
+
+        rejectProposalButton = new Button("Odrzuć układ");
+        rejectProposalButton.setStyle("-fx-background-color: lightcoral; -fx-text-fill: black;"); // Czerwony dla
+                                                                                                  // odrzucenia
+        rejectProposalButton.setVisible(false);
+        rejectProposalButton.setManaged(false);
+        rejectProposalButton.setOnAction(e -> {
+            sendCommand("RESUME"); // Odrzucenie zazwyczaj wznawia grę
+            setResponseModeUI(false); // Ukrywamy przyciski po kliknięciu
+            isPuttingPossible = false;
+        });
         resumeButton.setOnAction(e -> sendCommand("RESUME"));
-        HBox buttonBox = new HBox(10, passButton, resignButton, acceptButton, resumeButton);
-        buttonBox.setAlignment(Pos.CENTER_RIGHT);
-        buttonBox.setPadding(new Insets(10));
+        HBox standardRow = new HBox(10, passButton, resignButton, propositionButton);
+        standardRow.setAlignment(Pos.CENTER);
+
+        // Rząd 2: Akcje negocjacyjne (pojawiają się dynamicznie)
+        HBox negotiationRow = new HBox(10, resumeButton, acceptProposalButton, rejectProposalButton);
+        negotiationRow.setAlignment(Pos.CENTER);
+
+        // Główny kontener: układa rzędy jeden pod drugim
+        VBox buttonBox = new VBox(10, standardRow, negotiationRow);
+        buttonBox.setAlignment(Pos.CENTER);
 
         topBar = new BorderPane();
         topBar.setLeft(scoreBox);
@@ -162,7 +190,7 @@ public class GUIClient extends Application {
             if (x >= BOARD_SIZE || y >= BOARD_SIZE)
                 return;
 
-            if (isNegotiationMode) {
+            if (isNegotiationMode && isPuttingPossible) {
                 char column = (char) ('a' + x);
                 int row = y + 1;
                 String fieldId = x + "," + y;
@@ -183,7 +211,19 @@ public class GUIClient extends Application {
     }
 
     /**
-     * Przełącza widoczność przycisków w zależności od trybu gry.
+     * Toggles the visibility of UI components based on the Game Mode.
+     * <p>
+     * When Negotiation Mode is enabled:
+     * <ul>
+     * <li>Standard game buttons (Pass, Resign) are hidden.</li>
+     * <li>All Negotiation buttons are made visible (though some may be
+     * disabled).</li>
+     * </ul>
+     * When disabled, it reverts to the standard game UI.
+     * </p>
+     *
+     * @param enable {@code true} to show negotiation UI, {@code false} for standard
+     *               game UI.
      */
     private void setNegotiationModeUI(boolean enable) {
         // Jeśli tryb negocjacji: ukryj Pass/Resign, pokaż Accept/Resume
@@ -193,18 +233,94 @@ public class GUIClient extends Application {
         resignButton.setVisible(!enable);
         resignButton.setManaged(!enable);
 
-        acceptButton.setVisible(enable);
-        acceptButton.setManaged(enable);
+        // 2. Przyciski negocjacji - WSZYSTKIE widoczne, gdy są negocjacje
+        propositionButton.setVisible(enable);
+        propositionButton.setManaged(enable);
 
         resumeButton.setVisible(enable);
         resumeButton.setManaged(enable);
+
+        acceptProposalButton.setVisible(enable);
+        acceptProposalButton.setManaged(enable);
+
+        rejectProposalButton.setVisible(enable);
+        rejectProposalButton.setManaged(enable);
+
+        // Jeśli włączamy tryb negocjacji, ustawiamy domyślny stan:
+        // My edytujemy (aktywne: Propozycja/Wznowienie), Decyzja nieaktywna
+        if (enable) {
+            setNegotiationState(false);
+        }
     }
 
     /**
-     * Rysuje znacznik (np. zielony) na polu.
+     * Controls the active state (clickability) of negotiation buttons.
+     * <p>
+     * This manages the flow between proposing a territory arrangement and
+     * responding
+     * to an opponent's proposal.
+     * </p>
+     *
+     * @param isRespondingToOpponent
+     *                               {@code true} -> We received a proposal. Active:
+     *                               [Accept/Reject]. Disabled:
+     *                               [Propose/Resume].<br>
+     *                               {@code false} -> We are editing. Active:
+     *                               [Propose/Resume]. Disabled: [Accept/Reject].
+     */
+    private void setNegotiationState(boolean isRespondingToOpponent) {
+        propositionButton.setDisable(isRespondingToOpponent);
+        resumeButton.setDisable(isRespondingToOpponent);
+        acceptProposalButton.setDisable(!isRespondingToOpponent);
+        rejectProposalButton.setDisable(!isRespondingToOpponent);
+    }
+
+    /**
+     * Adjusts the UI specifically when a "NEGOTIATION PROPOSITION" is received.
+     * <p>
+     * This method ensures that only the decision buttons (Accept/Reject) are
+     * available
+     * for interaction, effectively locking the player into making a decision.
+     * </p>
+     *
+     * @param active {@code true} to show decision buttons, {@code false} to hide
+     *               them.
+     */
+    private void setResponseModeUI(boolean active) {
+        // Ukrywamy przyciski zwykłej gry
+        passButton.setVisible(false);
+        passButton.setManaged(false);
+        resignButton.setVisible(false);
+        resignButton.setManaged(false);
+
+        // Ukrywamy przyciski "mojej propozycji" (bo teraz oceniam propozycję rywala)
+        propositionButton.setVisible(false);
+        propositionButton.setManaged(false);
+        resumeButton.setVisible(false);
+        resumeButton.setManaged(false);
+
+        // Pokazujemy/Ukrywamy NOWE przyciski
+        acceptProposalButton.setVisible(active);
+        acceptProposalButton.setManaged(active);
+
+        rejectProposalButton.setVisible(active);
+        rejectProposalButton.setManaged(active);
+    }
+
+    /**
+     * Draws a semi-transparent marker on a specific field.
+     * <p>
+     * Used during the negotiation phase to indicate proposed territory ownership or
+     * dead stones.
+     * </p>
+     *
+     * @param x     The X grid coordinate.
+     * @param y     The Y grid coordinate.
+     * @param color The color of the marker border (indicating who claims the
+     *              territory).
      */
     public void drawMarker(int x, int y, Color color) {
-        if (boardCanvas == null)
+        if (boardCanvas == null || !isPuttingPossible)
             return;
         GraphicsContext gc = boardCanvas.getGraphicsContext2D();
 
@@ -227,7 +343,15 @@ public class GUIClient extends Application {
     }
 
     /**
-     * Przerysowuje pojedyncze pole, aby usunąć zielone zaznaczenie.
+     * Refreshes a single grid cell to its default state.
+     * <p>
+     * This method clears any negotiation markers or stones and redraws the
+     * background,
+     * grid lines, and the stone (if one exists in {@code boardState}).
+     * </p>
+     *
+     * @param x The X grid coordinate.
+     * @param y The Y grid coordinate.
      */
     private void refreshCell(int x, int y) {
         GraphicsContext gc = boardCanvas.getGraphicsContext2D();
@@ -389,15 +513,21 @@ public class GUIClient extends Application {
                     Platform.runLater(() -> {
 
                         // Protocol Parser
-                        // 1. Wykrycie zmiany stanu gry na GAME_NOT_RUNNING (Tryb zaznaczania)
                         if (message.contains("NEGOTIATIONS")) {
                             isNegotiationMode = true;
+                            isPuttingPossible = true;
                             logArea.appendText("SYSTEM: negocjacji.\n");
                             setNegotiationModeUI(true);
-                        } else if (message.equals("RESUME_GAME") || message.equals("PLAY")) {
+                        } else if (message.equals("NEGOTIATION PROPOSITION")) {
+                            isPuttingPossible = false;
+                            logArea.appendText("SYSTEM: Przesłano propozycje.\n");
+                            setNegotiationState(true);
+                        } else if (message.equals("RESUME_GAME")) {
                             isNegotiationMode = false;
-                            setNegotiationModeUI(false); // Przywróć stare przyciski
-                            logArea.appendText("SYSTEM: Wznowiono grę.\n");
+                            setNegotiationModeUI(false); // change active buttons
+                            markedBlackFields.clear();
+                            markedWhiteFields.clear();
+                            drawGrid();
                         } else if (message.equals("CLEAR_BOARD")) {
                             drawGrid();
                             markedBlackFields.clear();

@@ -141,7 +141,7 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
      * @param message The message to send.
      * @param target  The recipient (Specific player or BOTH).
      */
-    private void sendToTarget(String message, PlayerColor target) {
+    public void sendToTarget(String message, PlayerColor target) {
         if (target == PlayerColor.BOTH) {
             sendBroadcast(message);
         } else {
@@ -151,6 +151,17 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
         }
     }
 
+    /**
+     * Broadcasts the final result of the game to all players.
+     *
+     * Determines the message based on whether the game ended by resignation or
+     * by counting territories/stones.
+     *
+     * @param playerColor The winner of the game.
+     * @param whiteStones The total score of the White player.
+     * @param blackStones The total score of the Black player.
+     * @param byGivingUp  True if the game ended via resignation.
+     */
     public void sendWiningMassage(PlayerColor playerColor, int whiteStones, int blackStones, boolean byGivingUp) {
         if (!byGivingUp) {
             if (whiteStones > blackStones) {
@@ -163,26 +174,72 @@ public class OutputGameAdapter implements GameOutputAdapter<String> {
         }
     }
 
+    /**
+     * Notifies all players about whose turn it is.
+     *
+     * @param playerColor The color of the active player.
+     */
     public void sendCurrentPlayer(PlayerColor playerColor) {
         sendBroadcast("STATUS: " + playerColor);
 
     }
 
+    /**
+     * Broadcasts a signal to start the negotiation phase.
+     *
+     * This informs clients to switch from gameplay mode to territory selection
+     * mode.
+     */
     public void sendNegotiationStart() {
         sendBroadcast("NEGOTIATION");
     }
 
+    /**
+     * Notifies players that the negotiation phase has ended or a proposal
+     * has been finalized.
+     *
+     * @param playerColor The player associated with the end of negotiation event.
+     */
     public void sendEndOfNegotiationToPlayer(PlayerColor playerColor) {
         sendBroadcast("NEGOTIATION ENDED");
     }
 
+    /**
+     * Sends a specific update regarding a territory proposal on the board.
+     *
+     * Used to synchronize the visual markers (e.g., green squares) on clients.
+     *
+     * @param x           The X coordinate of the field.
+     * @param y           The Y coordinate of the field.
+     * @param playerColor The color claiming the territory.
+     * @param update_type The type of update ("+" to add, "-" to remove).
+     */
     public void sendTeritoryUpdate(int x, int y, PlayerColor playerColor, String update_type) {
         sendBroadcast("REC_PROP " + playerColor + " " + x + " " + y + " " + update_type);
 
     }
 
+    /**
+     * Broadcasts the current count of stones captured by each player.
+     *
+     * @param blackCaptured Total stones captured by Black.
+     * @param whiteCaptured Total stones captured by White.
+     */
     public void sendCaptureStonesQuantity(int blackCaptured, int whiteCaptured) {
         sendBroadcast("black captured stones: " + blackCaptured + " white captured stones: " + whiteCaptured);
 
+    }
+
+    /**
+     * Resumes the game from the negotiation phase, typically if a proposal was
+     * rejected.
+     *
+     * This re-sends the board state to ensure all clients have the correct view
+     * before continuing gameplay.
+     *
+     * @param board The current state of the board.
+     */
+    public void resumeGame(Board board) {
+        sendBoard(board, PlayerColor.BOTH);
     }
 }

@@ -49,19 +49,55 @@ public interface GameInputAdapter<InputType> {
      */
     void sendBoardRequest(PlayerColor color);
 
+    /**
+     * Processes a territory negotiation command during the scoring phase.
+     *
+     * This handles proposals to mark territories or dead stones.
+     *
+     * @param input The command input (e.g., "PROP + A 10").
+     * @param color The color of the player making the proposal.
+     */
     void sendChangingTeritory(InputType input, PlayerColor color);
 
     /**
-     * Pass move and
+     * Signals that the player wishes to pass their turn.
      *
-     * @param color Player who pass move
+     * Passing is a strategic move, usually done when a player believes there are
+     * no more profitable moves to make.
+     *
+     * @param color The color of the player passing.
      */
     void sendPass(PlayerColor color);
 
     /**
-     * Give up
+     * Signals that the player wishes to resign (give up) the game.
      *
-     * @param color Player who gives up
+     * @param color The color of the player resigning.
      */
     void sendGiveUp(PlayerColor color);
+
+    /**
+     * Signals that a player rejects the current territory proposal and wishes to
+     * resume gameplay.
+     *
+     * @param color The color of the player requesting the resume.
+     */
+    void sendResumeGame(PlayerColor color);
+
+    /**
+     * Signals that a player accepts the current territory arrangement.
+     *
+     * If this is the first player to accept, the game waits for the second player.
+     *
+     * @param color The color of the player accepting the proposal.
+     */
+    void proposeFinishNegotiation(PlayerColor color);
+
+    /**
+     * Signals that the second player has accepted the arrangement, finalizing the
+     * game.
+     *
+     * @param color The color of the player finalizing the negotiation.
+     */
+    void acceptFinishNegotiation(PlayerColor color);
 }

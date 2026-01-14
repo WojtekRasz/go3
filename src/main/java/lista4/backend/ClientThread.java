@@ -147,8 +147,14 @@ class ClientThread implements Runnable {
                         inAdapter.sendPass(color);
                     } else if (clientMessage.equals("GIVE UP")) { // give up
                         inAdapter.sendGiveUp(color);
+                    } else if (clientMessage.equals("PROPOSITION")) {
+                        inAdapter.proposeFinishNegotiation(color); // Player want to end the negotiation
                     } else if (clientMessage.contains("PROP")) {
                         inAdapter.sendChangingTeritory(clientMessage, color);
+                    } else if (clientMessage.equals("RESUME")) {
+                        inAdapter.sendResumeGame(color); // resume the game
+                    } else if (clientMessage.equals("ACCEPT")) {
+                        inAdapter.acceptFinishNegotiation(color); // Player accepts the proposition
                     } else {
                         inAdapter.makeMove(clientMessage, color);
                     }
@@ -163,7 +169,6 @@ class ClientThread implements Runnable {
         } catch (IOException e) {
             System.err.println("Błąd komunikacji z klientem " + socket.getInetAddress() + ": " + e.getMessage());
         } finally {
-            // Cleanup
             try {
                 gamers.remove(color);
                 gameManager.waitGame();

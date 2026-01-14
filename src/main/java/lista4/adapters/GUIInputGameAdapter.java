@@ -11,14 +11,15 @@ import lista4.gameLogic.Move;
  * An implementation of {@link GameInputAdapter} tailored for GUI clients.
  * <p>
  * This class acts as a bridge between the raw string commands received from a
- * GUI client
- * and the internal logic of the {@link GameManager}. Its main responsibilities
- * are:
+ * JavaFX GUI client and the internal logic of the {@link GameManager}.
+ * Its main responsibilities are:
  * <ul>
  * <li>Validating the format of incoming move commands using Regex.</li>
+ * <li>Parsing negotiation commands (adding/removing territory proposals).</li>
  * <li>Translating string coordinates (e.g., "A 1") into integer grid
  * coordinates (x=0, y=0).</li>
- * <li>Delegating valid moves to the {@link GameManager}.</li>
+ * <li>Delegating valid actions (moves, passes, resignations, negotiations) to
+ * the {@link GameManager}.</li>
  * </ul>
  * </p>
  */
@@ -89,6 +90,21 @@ public class GUIInputGameAdapter implements GameInputAdapter<String> {
         gameManager.sendBoard(color);
     };
 
+    /**
+     * Processes a territory negotiation command during the scoring phase.
+     * <p>
+     * Expects a command in the format: <code>"PROP [+/-] [Letter] [Number]"</code>.
+     * <ul>
+     * <li><b>+</b>: Proposes marking a stone group as dead (or territory as
+     * owned).</li>
+     * <li><b>-</b>: Removes a previous proposal.</li>
+     * </ul>
+     * </p>
+     *
+     * @param input The raw command string (e.g., "PROP + A 10").
+     * @param color The color of the player making the proposal.
+     * @throws WrongMoveFormat If the command format is invalid.
+     */
     public void sendChangingTeritory(String input, PlayerColor color) {
         if (input.matches("PROP [+-] [a-sA-S] [1-9]") || input.matches("PROP [+-] [a-sA-S] 1[0-9]")) {
             String[] parts = input.split(" ");
@@ -108,12 +124,59 @@ public class GUIInputGameAdapter implements GameInputAdapter<String> {
         }
     }
 
+    /**
+     * Signals that the player wishes to pass their turn.
+     *
+     * @param color The color of the player passing.
+     */
     public void sendPass(PlayerColor color) {
         gameManager.passMove(color);
     }
 
+    /**
+     * Signals that the player wishes to resign (give up) the game.
+     *
+     * @param color The color of the player resigning.
+     */
     public void sendGiveUp(PlayerColor color) {
         gameManager.giveUpGame(color);
     }
 
+    /**
+     * Signals that a player rejects the current territory proposal and wishes to
+     * resume gameplay.
+     * <p>
+     * This moves the game state from NEGOTIATIONS back to RUNNING.
+     * </p>
+     *
+     * @param color The color of the player resuming the game.
+     */
+    public void sendResumeGame(PlayerColor color) {
+        gameManager.resumeGame(color);
+    }
+
+    /**
+     * Signals that a player accepts the current territory arrangement.
+     * <p>
+     * If this is the first player to accept, the game waits for the second player.
+     * </p>
+     *
+     * @param color The color of the player accepting the proposal.
+     */
+    public void proposeFinishNegotiation(PlayerColor color) {
+        gameManager.proposeFinishNegotiation(color);
+    }
+
+    /**
+     * Signals that the second player has accepted the arrangement.
+     * <p>
+     * This finalizes the negotiations and triggers the end of the game and score
+     * calculation.
+     * </p>
+     *
+     * @param color The color of the player finalizing the negotiation.
+     */
+    public void acceptFinishNegotiation(PlayerColor color) {
+        gameManager.finishNegotiation(color);
+    }
 }
