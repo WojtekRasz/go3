@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html","k":"18"},{"l":"lista4.adapters"},{"l":"lista4.backend"},{"l":"lista4.frontend"},{"l":"lista4.gameInterface"},{"l":"lista4.gameInterface.IOExceptions"},{"l":"lista4.gameLogic"},{"l":"lista4.gameLogic.gameExceptions"},{"l":"lista4.gameLogic.state"}];updateSearchResults();

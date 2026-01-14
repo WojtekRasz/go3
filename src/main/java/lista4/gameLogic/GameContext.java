@@ -72,7 +72,7 @@ public class GameContext {
      *
      * @return PlayerColor of current player
      */
-    public PlayerColor getPlayerColor() {
+    public PlayerColor getCurPlayerColor() {
         return curPlayerColor;
     }
 

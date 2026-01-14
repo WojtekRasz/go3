@@ -1,0 +1,8 @@
+lista4.adapters
+lista4.backend
+lista4.frontend
+lista4.gameInterface
+lista4.gameInterface.IOExceptions
+lista4.gameLogic
+lista4.gameLogic.gameExceptions
+lista4.gameLogic.state

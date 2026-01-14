@@ -107,4 +107,9 @@ public class Stone {
 
     /** Returns the board this stone belongs to */
     public Board getBoard() { return board; }
+
+    public int getBreathCount(){
+        updateBreaths();
+        return breaths.size();
+    }
 }

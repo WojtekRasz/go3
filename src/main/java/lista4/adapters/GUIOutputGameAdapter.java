@@ -115,7 +115,7 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
     public void sendExceptionMessage(Exception exception, PlayerColor target) {
         PrintWriter out = activeWriters.get(target);
         out.println(exception.getMessage());
-        out.println("blad");
+        //out.println("blad");
     };
 
     /**
