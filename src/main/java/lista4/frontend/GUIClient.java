@@ -70,6 +70,7 @@ public class GUIClient extends Application {
 
     private List<String> markedBlackFields = new ArrayList<>();
     private List<String> markedWhiteFields = new ArrayList<>();
+    private Color[][] boardState = new Color[BOARD_SIZE][BOARD_SIZE];
 
     /**
      * The main entry point for the JavaFX application.
@@ -231,17 +232,21 @@ public class GUIClient extends Application {
     private void refreshCell(int x, int y) {
         GraphicsContext gc = boardCanvas.getGraphicsContext2D();
 
-        // 1. Tło
+        // background
         double startX = x * CELL_SIZE;
         double startY = y * CELL_SIZE;
         gc.setFill(Color.web("#DEB887"));
         gc.fillRect(startX, startY, CELL_SIZE, CELL_SIZE);
 
-        // 2. Linie siatki
+        // lines
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
         gc.strokeLine(startX, startY + CELL_SIZE / 2.0, startX + CELL_SIZE, startY + CELL_SIZE / 2.0);
         gc.strokeLine(startX + CELL_SIZE / 2.0, startY, startX + CELL_SIZE / 2.0, startY + CELL_SIZE);
+        // draw stone if exists
+        if (boardState[x][y] != null) {
+            drawStone(x, y, boardState[x][y]);
+        }
 
         String fieldId = x + "," + y;
         if (markedBlackFields.contains(fieldId)) {
@@ -338,6 +343,11 @@ public class GUIClient extends Application {
         } else {
             refreshCell(x, y);
         }
+        if (color == Color.TRANSPARENT) {
+            boardState[x][y] = null;
+        } else {
+            boardState[x][y] = color;
+        }
     }
 
     /**
@@ -425,7 +435,6 @@ public class GUIClient extends Application {
                                 } else { // usuń propozycje
                                     refreshCell(x, y);
                                 }
-                                // drawGrid();
                             } catch (Exception e) {
                                 logArea.setText("Błąd rysowania: " + e.getMessage() + "\n");
                             }
