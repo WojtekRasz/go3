@@ -98,6 +98,7 @@ public class Board {
      */
     public boolean checkSuicide(Set<StoneChain> chains, Stone stone){
         int allBreaths = 0;
+        //Sumuje oddechy kamienia stone i wszystkie oddechy łańcuchów chains (w założeniu mają to być sąsiedzi)
         allBreaths += stone.getChain().getBreathCount();
         for(StoneChain stonesChain : chains) {
             allBreaths += stonesChain.getBreathCount();
@@ -117,12 +118,17 @@ public class Board {
     public void putStone(int x, int y, Stone stone) throws FieldNotAvailableException {
         Set<StoneChain> friendlyNeighbourChain = new HashSet<>();
         Set<StoneChain> stonesChainsToCapture = new HashSet<>();
+
+        //Sprawdza czy pole na planszy jest puste
         if (!isEmpty(x,y)) {
             throw new FieldOcupiedException(new Move(x, y, stone.getPlayerColor()));
         }
 
+        //Kładzie kamieńs na planszy(przy błędach zostanie on usunięty)
         board[x][y].putStone(stone);
 
+        //Sprawdza sąsiadów i liczy przyjazne kamienie, by potencjalnie połączyć się z nimi w łańcuch
+        //Szuka też łańcuchów kamieni przeciwnika, które straciły wszystkie oddechy
         for(Field neighbour : board[x][y].getNeighbours()) {
             if (neighbour.getStone() == null) continue;
 
@@ -139,42 +145,45 @@ public class Board {
 
         boolean hasCaptured = false;
 
+        //Jeżeli są kamienie do bicia, które są w KO (czyli wcześniej kamień, który tam był zbijał jak w ruchu samobójczym)
+        //to usuwa kamień wyrzuca błąd
         if(!stonesChainsToCapture.isEmpty() && ko){
             for(StoneChain stonesChain : stonesChainsToCapture) {
                 if(stonesChain.getStones().contains(koStone)) {
-                    removeStone(x, y) ;
+                    removeStone(x, y);
                     throw new CaptureInKoException();
                 }
             }
         }
 
+        //Sprawdza, czy postawiony kamień z sąsiadami tworzą łańcuch samobójczy przed zbiciem
         boolean suicide = checkSuicide(friendlyNeighbourChain, stone);
 
-        if(!ko){
-
-            for(StoneChain stonesChain : stonesChainsToCapture) {
-                stonesChain.captureChain();
-                System.out.println("BICIE");
-                hasCaptured = true;
-            }
+        //Sprawdziliśmy już wcześniej czy bicie jest w KO, więc skoro tu doszliśmy, to nie jest, czyli zbijamy
+        for(StoneChain stonesChain : stonesChainsToCapture) {
+            stonesChain.captureChain();
+            System.out.println("BICIE");
+            hasCaptured = true;
         }
 
+        //Jeżeli ruch nic nie zbija i był samobójczy (co oznacza, że dalej jest, skoro nic nie zbił)
+        //to wyrzuca błąd i usuwa kamień
         if(!hasCaptured && suicide) {
             System.out.println("SAMOBÓJSTWO");
             removeStone(x, y) ;
             throw new SuicideException(new Move(x, y, stone.getPlayerColor()));
         }
 
-        else {
-            ko = suicide;
-            if(ko) koStone = stone;
-            else koStone = null;
+        //Jeżeli ruch był samobójczy, ale zbił kamienie następuje KO
+        ko = suicide;
+        if(ko) koStone = stone;
+        else koStone = null;
 
-            stone.setChain(new StoneChain(stone));
-            for(StoneChain stonesChain : friendlyNeighbourChain) {
-                stone.getChain().merge(stonesChain);
-            }
+        //Łączy łańcuchy w jeden łańcuch
+        for(StoneChain stonesChain : friendlyNeighbourChain) {
+            stone.getChain().merge(stonesChain);
         }
+
     }
 
     /**

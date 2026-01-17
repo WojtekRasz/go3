@@ -159,6 +159,12 @@ public class GameManager {
     }
 
     // Robi ruchy
+
+    /**
+     * Makes move and send board and current player to output (eventually error instead if occurs)
+     *
+     * @param move Move that is meant to be done
+     */
     public void makeMove(Move move) {
         try {
             Exception canMakeMove = canMakeMove(move.playerColor);
@@ -207,6 +213,11 @@ public class GameManager {
 
     // Wznawia gre po nieudanych negocjacjach. Ustawia ture gracza na przeciwnika
     // tego co przerwał
+
+    /**
+     * Resume game after fail in negotiation
+     * @param playerColor - player who stopped negotiations
+     */
     public void resumeGame(PlayerColor playerColor) {
 
         gameContext.setCurPlayerColor(playerColor.other());
@@ -219,12 +230,22 @@ public class GameManager {
     }
 
     // Uruchamiane gdy jeden z graczy zakończył negocjacje i czeka na drugiego
+
+    /**
+     * Sending to other player negotiation result to accept or refuse it
+     * @param playerColor - player who ended negotiations
+     */
     public void proposeFinishNegotiation(PlayerColor playerColor) {
         outAdapter.sendEndOfNegotiationToPlayer(playerColor.other());
         colorOfProposal = playerColor;
     }
 
     // Gdy 2 się zgodzi negocjacje się kończą
+
+    /**
+     * Finishes negotiation after 2nd player accepted
+     * @param color - player who finished negotiations (to validate its not the same who made proposal)
+     */
     public void finishNegotiation(PlayerColor color) {
         if (colorOfProposal != color) {
             PlayerColor winner = calculateWining();
@@ -236,6 +257,11 @@ public class GameManager {
     }
 
     // Poddaj gre
+
+    /**
+     * Give up game
+     * @param playerColor - player who gives up
+     */
     public void giveUpGame(PlayerColor playerColor) {
         outAdapter.sendWiningMassage(playerColor.other(), 0, 0, true);
 
@@ -243,6 +269,13 @@ public class GameManager {
     }
 
     // Dodaj terytorium
+
+    /**
+     * Add territory in negotiations
+     * @param playerColor - color of territory
+     * @param x - x cord of territory
+     * @param y - y cord of territory
+     */
     public void addTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
             outAdapter.sendExceptionMessage(new NegotiationsNotPresent(""), playerColor);
@@ -253,6 +286,12 @@ public class GameManager {
         outAdapter.sendTeritoryUpdate(x, y, playerColor, "+");
     }
 
+    /**
+     * Removes territory in negotiations
+     * @param playerColor - color of territory
+     * @param x - x cord of territory
+     * @param y - y cord of territory
+     */
     public void removeTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
             outAdapter.sendExceptionMessage(new NegotiationsNotPresent(""), playerColor);
@@ -263,12 +302,21 @@ public class GameManager {
         outAdapter.sendTeritoryUpdate(x, y, playerColor, "-");
     }
 
+    /**
+     * Adding captured stone of color
+     * @param playerColor - color of captured stone
+     */
     public void addCaptured(PlayerColor playerColor) {
         gameContext.addCaptured(playerColor);
     }
 
+    /**
+     * Sending captured stone quantity of each color to output
+     */
     public void sendCaptured() {
-        outAdapter.sendCaptureStonesQuantity(gameContext.getCaptured(PlayerColor.BLACK),
-                gameContext.getCaptured(PlayerColor.WHITE));
+        outAdapter.sendCaptureStonesQuantity(
+                gameContext.getCaptured(PlayerColor.BLACK),
+                gameContext.getCaptured(PlayerColor.WHITE)
+        );
     }
 }

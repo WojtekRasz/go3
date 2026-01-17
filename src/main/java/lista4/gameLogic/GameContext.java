@@ -129,6 +129,12 @@ public class GameContext {
         consecutivePasses = 0;
     }
 
+    /**
+     * Add territory
+     * @param playerColor - territory to remove
+     * @param x - x cord of territory
+     * @param y - y cord of territory
+     */
     public void addTerritory(PlayerColor playerColor, int x, int y) {
         int cordsCode = 100 * y + x;
         if (playerColor == PlayerColor.WHITE) {
@@ -141,6 +147,12 @@ public class GameContext {
         }
     }
 
+    /**
+     * Remove territory
+     * @param playerColor - territory to remove
+     * @param x - x cord of territory
+     * @param y - y cord of territory
+     */
     public void removeTerritory(PlayerColor playerColor, int x, int y) {
         int cordsCode = 100 * y + x;
         if (playerColor == PlayerColor.WHITE) {
@@ -151,19 +163,34 @@ public class GameContext {
         }
     }
 
+    /**
+     * clears territories
+     */
     public void clearTerritories() {
         blackTerritory.clear();
         whiteTerritory.clear();
     }
 
+    /**
+     * Returns black points (Black territory and white captured stones (So captured by black)
+     * @return points of black player
+     */
     public int blackPoints() {
         return blackTerritory.size() + whiteCaptured;
     }
 
+    /**
+     * Returns white points (White territory and black captured stones (So captured by white)
+     * @return points of white player
+     */
     public int whitePoints() {
         return whiteTerritory.size() + blackCaptured;
     }
 
+    /**
+     * Increment number of captured stones
+     * @param playerColor color of stone to increment
+     */
     public void addCaptured(PlayerColor playerColor) {
         if (playerColor == PlayerColor.WHITE) {
             whiteCaptured++;
@@ -173,6 +200,11 @@ public class GameContext {
         }
     }
 
+    /**
+     * Returns captured stones of each colors
+     * @param playerColor color of captured stones
+     * @return captured stones of given color
+     */
     public int getCaptured(PlayerColor playerColor) {
         if (playerColor == PlayerColor.WHITE) {
             return whiteCaptured;

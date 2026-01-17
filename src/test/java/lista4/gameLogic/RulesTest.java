@@ -44,9 +44,6 @@ class RulesTest {
         assertEquals(board.getStone(1, 1), null);
     }
 
-    // --------------------------------------------------
-    // 2️⃣ Nie można popełnić samobójstwa
-    // --------------------------------------------------
     @Test
     void suicideMoveIsForbidden() throws Exception {
         /*
@@ -74,9 +71,7 @@ class RulesTest {
         assertTrue(board.isEmpty(1, 1));
     }
 
-    // --------------------------------------------------
-    // 3️⃣ Zasada Ko – nie wolno natychmiast odbić
-    // --------------------------------------------------
+
     @Test
     void koRulePreventsImmediateRecapture() throws Exception {
         /*

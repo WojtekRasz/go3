@@ -18,8 +18,14 @@ class StoneAndChainTest {
     }
 
     @Test
-    void testBreathCount() {
+    void testBreathCountCorner() {
         assertEquals(2, black.getBreathCount()); // rogi planszy mają 2 wolne pola
+    }
+
+    @Test
+    void testBreathCountEdge() {
+        Stone blackEdge = new Stone(0,4, PlayerColor.BLACK, board);
+        assertEquals(3, blackEdge.getBreathCount());
     }
 
     @Test
