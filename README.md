@@ -3,8 +3,12 @@ go gameManager for studies
 
 # How to run application?
 use mvn package
-to run server: java -cp .\target\Go-1.0-SNAPSHOT.jar Server 
-to run clientj: java -cp .\target\Go-1.0-SNAPSHOT.jar lista4.Client 
+
+to run server:
+java -cp target/Go-1.0-SNAPSHOT.jar lista4.backend.Server
+
+to run client: 
+mvn javafx:run
 
 --
 klient podaje w formacie: "[A-Z] [0-9]"
