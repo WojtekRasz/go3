@@ -172,11 +172,7 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
      */
     public void sendWiningMassage(PlayerColor playerColor, int whiteStones, int blackStones, boolean byGivingUp) {
         if (!byGivingUp) {
-            if (whiteStones > blackStones) {
-                sendBroadcast("Zwyciężył Biały");
-            } else {
-                sendBroadcast("Zwyciężył Czarny");
-            }
+            sendBroadcast("Zwyciężył " + playerColor);
         } else {
             sendBroadcast(playerColor + " wygrał.");
         }
