@@ -1,13 +1,15 @@
 # go
-go gameManager for studies
+go game for studies
 
 # How to run application?
-use mvn package
+- in yor console run:
 
-to run server:
+git clone https://github.com/Krzesimir04/go_second_iteration
+cd go_second_iteration 
+mvn package
 java -cp target/Go-1.0-SNAPSHOT.jar lista4.backend.Server
 
-to run client: 
+ - in other consoles (in the same directory with pom.xml file) run two GUI clients to play by using:
 mvn javafx:run
 
 --
