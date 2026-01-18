@@ -136,7 +136,7 @@ public class GameContext {
      * @param y - y cord of territory
      */
     public void addTerritory(PlayerColor playerColor, int x, int y) {
-        int cordsCode = 100 * y + x;
+        int cordsCode = 100 * y + x; //Code of territory
         if (playerColor == PlayerColor.WHITE) {
             if (!blackTerritory.contains(cordsCode))
                 whiteTerritory.add(cordsCode);
@@ -154,7 +154,7 @@ public class GameContext {
      * @param y - y cord of territory
      */
     public void removeTerritory(PlayerColor playerColor, int x, int y) {
-        int cordsCode = 100 * y + x;
+        int cordsCode = 100 * y + x; // Code of territory
         if (playerColor == PlayerColor.WHITE) {
             whiteTerritory.remove(cordsCode);
         }
