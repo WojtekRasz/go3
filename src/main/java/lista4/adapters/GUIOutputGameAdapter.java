@@ -171,15 +171,7 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
      * @param byGivingUp  True if the game ended by resignation.
      */
     public void sendWiningMassage(PlayerColor playerColor, int whiteStones, int blackStones, boolean byGivingUp) {
-        if (!byGivingUp) {
-            if (whiteStones > blackStones) {
-                sendBroadcast("Zwyciężył Biały");
-            } else {
-                sendBroadcast("Zwyciężył Czarny");
-            }
-        } else {
-            sendBroadcast(playerColor + " wygrał.");
-        }
+        sendBroadcast(playerColor + " wygrał.");
     }
 
     /**
