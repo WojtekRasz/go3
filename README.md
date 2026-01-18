@@ -5,11 +5,15 @@ go game for studies
 - in yor console run:
 
 git clone https://github.com/Krzesimir04/go_second_iteration
+
 cd go_second_iteration 
+
 mvn package
+
 java -cp target/Go-1.0-SNAPSHOT.jar lista4.backend.Server
 
  - in other consoles (in the same directory with pom.xml file) run two GUI clients to play by using:
+ 
 mvn javafx:run
 
 --
