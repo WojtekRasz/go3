@@ -13,12 +13,14 @@ mvn package
 java -cp target/Go-1.0-SNAPSHOT.jar lista4.backend.Server
 
  - in other consoles (in the same directory with pom.xml file) run two GUI clients to play by using:
- 
+
 mvn javafx:run
 
 --
-klient podaje w formacie: "[A-Z] [0-9]"
-mamy Adaptery między serwerem a grą 
+
+To run console client in other consoles (in the same directory with pom.xml file) run two clients to play by using:
+
+java -cp target/Go-1.0-SNAPSHOT.jar lista4.frontend.Client
 
 --
 Used design patterns:
