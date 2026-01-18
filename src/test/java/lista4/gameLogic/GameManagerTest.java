@@ -23,6 +23,7 @@ class GameManagerTest {
     @Test
     void testMakeMove() {
         // RUCH GRACZA
+        GameManager.resetForTests();
         Move move = new Move(0, 0, PlayerColor.BLACK);
         manager.makeMove(move);
 

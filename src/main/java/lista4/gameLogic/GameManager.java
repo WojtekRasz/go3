@@ -55,6 +55,12 @@ public class GameManager {
         }
         return instance;
     }
+    /**
+     * Resets the GameManager instance for testing purposes.
+     */
+    public static void resetForTests() {
+        instance = new GameManager();
+    }
 
     /**
      * Sets the output adapter used to communicate game updates.
