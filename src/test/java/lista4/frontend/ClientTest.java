@@ -41,7 +41,7 @@ class ClientTest {
         Thread serverThread = new Thread(() -> {
             try {
                 // Wywołujemy main Twojego serwera
-                Server.main(new String[] {});
+                ServerDB.main(new String[] {});
             } catch (IOException e) {
                 return;
                 // Jeśli port zajęty, serwer się nie uruchomi
