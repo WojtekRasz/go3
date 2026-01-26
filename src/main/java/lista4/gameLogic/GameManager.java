@@ -1,10 +1,17 @@
 package lista4.gameLogic;
 
+import lista4.dbModel.GameEntity;
+import lista4.dbModel.MoveEntity;
+import lista4.dbRepositories.GameRepository;
+import lista4.dbRepositories.MoveRepository;
 import lista4.gameInterface.GameOutputAdapter;
 import lista4.gameLogic.gameExceptions.GameNotRunningException;
 import lista4.gameLogic.gameExceptions.NegotiationsNotPresent;
 import lista4.gameLogic.gameExceptions.OtherPlayersTurnException;
 import lista4.gameLogic.state.GameState;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDateTime;
 
 /**
  * Singleton class responsible for managing the overall game flow.
@@ -30,6 +37,8 @@ public class GameManager {
     /** Player who send the proposition to end negotiations */
     private PlayerColor colorOfProposal;
 
+    private GameRepository gameRepository;
+    private MoveRepository moveRepository;
     /**
      * Private constructor for singleton pattern.
      * Initializes the board and sets the initial player.
@@ -38,6 +47,11 @@ public class GameManager {
         gameContext = new GameContext(GameState.GAME_NOT_INITIALIZED);
         gameContext.setCurPlayerColor(PlayerColor.BLACK);
         board = new Board();
+    }
+
+    public void setRepositories(GameRepository gameRepository, MoveRepository moveRepository) {
+        this.gameRepository = gameRepository;
+        this.moveRepository = moveRepository;
     }
 
     /**
@@ -105,6 +119,12 @@ public class GameManager {
      */
     public void startGame() {
         gameContext.startGame();
+
+        GameEntity gameEntity = new GameEntity();
+        gameEntity.setStartTime(LocalDateTime.now());
+        gameRepository.save(gameEntity);
+        gameContext.setCurGameEntity(gameEntity);
+
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
         outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
 
@@ -180,6 +200,15 @@ public class GameManager {
             Stone stone = new Stone(move.x, move.y, move.playerColor, board);
             board.putStone(move.x, move.y, stone);
 
+            MoveEntity moveEntity = new MoveEntity();
+            moveEntity.setGame(gameContext.getCurGameEntity());
+            moveEntity.setMoveNumber(gameContext.getMoveNumber());
+            moveEntity.setX(move.x);
+            moveEntity.setY(move.y);
+            moveEntity.setColor(move.playerColor.toString());
+            moveEntity.setPass(false);
+            moveRepository.save(moveEntity);
+
             outAdapter.sendBoard(board, PlayerColor.BOTH);
             sendCaptured();
             gameContext.resetPasses();
@@ -204,6 +233,16 @@ public class GameManager {
                 throw canMakeMove;
 
             gameContext.passNextPlayer();
+
+            MoveEntity move = new MoveEntity();
+            move.setGame(gameContext.getCurGameEntity());
+            move.setMoveNumber(gameContext.getMoveNumber());
+            move.setX(-1);
+            move.setY(-1);
+            move.setColor(playerColor.toString());
+            move.setPass(true);
+            moveRepository.save(move);
+
             if (gameContext.getConsecutivePasses() == 2) {
                 gameContext.startNegotiations();
                 gameContext.resetPasses();

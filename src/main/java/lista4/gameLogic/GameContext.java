@@ -1,5 +1,6 @@
 package lista4.gameLogic;
 
+import lista4.dbModel.GameEntity;
 import lista4.gameLogic.state.GameState;
 
 /**
@@ -26,6 +27,9 @@ public class GameContext {
     int blackCaptured = 0;
 
     GameState curGameState;
+
+    GameEntity curGameEntity;
+    int moveNumber = 0;
 
     /**
      * Creates a new GameContext with the specified initial state.
@@ -85,6 +89,7 @@ public class GameContext {
 
     public void nextPlayer() {
         curPlayerColor = curPlayerColor.other();
+        moveNumber++;
     }
 
     /**
@@ -213,6 +218,26 @@ public class GameContext {
             return blackCaptured;
         }
         return 0;
+    }
+
+    public GameEntity getCurGameEntity() {
+        return curGameEntity;
+    }
+
+    public void setCurGameEntity(GameEntity curGameEntity) {
+        this.curGameEntity = curGameEntity;
+    }
+
+    public int getMoveNumber() {
+        return moveNumber;
+    }
+
+    public void setMoveNumber(int moveNumber) {
+        this.moveNumber = moveNumber;
+    }
+
+    public void resetMoveNumber() {
+        this.moveNumber = 0;
     }
 
     // public int whitePoints() {

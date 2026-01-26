@@ -37,4 +37,15 @@ public enum PlayerColor {
         }
         return BOTH;
     }
+
+    @Override
+    public String toString() {
+        if (this.equals(BLACK)) {
+            return "BLACK";
+        }
+        if (this.equals(WHITE)) {
+            return "WHITE";
+        }
+        return "BOTH";
+    }
 }

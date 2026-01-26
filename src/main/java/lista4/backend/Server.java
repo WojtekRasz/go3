@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.List;
 import java.util.ArrayList;
 
+import lista4.dbRepositories.GameRepository;
+import lista4.dbRepositories.MoveRepository;
 import lista4.gameLogic.GameManager;
 import lista4.gameLogic.PlayerColor;
 import lista4.gameInterface.GameInputAdapter;
@@ -16,6 +18,8 @@ import lista4.adapters.InputGameAdapter;
 import lista4.adapters.OutputGameAdapter;
 import lista4.adapters.GUIInputGameAdapter;
 import lista4.adapters.GUIOutputGameAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The main entry point for the Game Server.
@@ -36,8 +40,8 @@ import lista4.adapters.GUIOutputGameAdapter;
  * </ul>
  * </p>
  */
+@Component
 public class Server {
-
     /** The maximum number of players allowed in a single game session. */
     private static int GAMERS_NUMBER = 2;
 
@@ -90,11 +94,11 @@ public class Server {
      * </ol>
      * </p>
      *
-     * @param args Command line arguments (not used).
+
      * @throws IOException If the server cannot bind to the specified port or accept
      *                     connections.
      */
-    public static void main(String[] args) throws IOException {
+    public void start() throws IOException {
         System.out.println("Wielowątkowy serwer jest uruchomiony na porcie " + PORT + "...");
 
         // Prepare adapter lists to allow ClientThread to switch between Console/GUI

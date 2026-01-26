@@ -12,8 +12,9 @@ class ServerTest {
     void testServerAcceptsConnection() throws InterruptedException {
         // Uruchamiamy serwer w osobnym wątku, żeby nie blokował testu
         Thread serverThread = new Thread(() -> {
+        Server server = new Server();
             try {
-                Server.main(new String[] {});
+                server.start();
             } catch (IOException ignored) {
             }
         });
