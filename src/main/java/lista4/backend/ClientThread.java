@@ -126,13 +126,13 @@ class ClientThread implements Runnable {
             // Registration
             out.println(color);
             outAdapter.registerPlayer(color, out);
-            synchronized (gamers) {
-                if (gamers.size() == 2) { // if we have 2 palyers then run the game
+            if (gamers.size() == 2) { // if we have 2 palyers then run the game
+                synchronized (gamers) {
                     System.out.println("Mamy 2 graczy! Uruchamiam grę.");
                     gameManager.startGame();
-                } else {
-                    out.println("WAIT Czekanie na drugiego gracza...");
                 }
+            } else {
+                out.println("WAIT Czekanie na drugiego gracza...");
             }
             // Command Loop
             while (in.hasNextLine()) {
@@ -188,6 +188,9 @@ class ClientThread implements Runnable {
             try {
                 gamers.remove(color);
                 gameManager.waitGame();
+                PlayerColor botColor = (color == PlayerColor.BLACK) ? PlayerColor.WHITE
+                        : PlayerColor.BLACK;
+                gameManager.deActivateBot(botColor);
                 socket.close();
                 System.out.println(">> Połączenie zakończone z klientem: " + socket.getInetAddress());
             } catch (IOException e) {

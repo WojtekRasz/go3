@@ -527,6 +527,9 @@ public class GUIClient extends Application {
                         } else if (message.startsWith("BOT_READY")) { // bot ready, change button visibility
                             playWithBotButton.setManaged(false);
                             playWithBotButton.setVisible(false);
+                        } else if (message.contains("STATUS: GAME_RUNNING")) {
+                            playWithBotButton.setManaged(false);
+                            playWithBotButton.setVisible(false);
                         } else if (message.equals("NEGOTIATION PROPOSITION")) {
                             isPuttingPossible = false;
                             logArea.appendText("SYSTEM: Przesłano propozycje.\n");
