@@ -58,6 +58,13 @@ public class GameManager {
         }
     }
 
+    public void deActivateBot(PlayerColor color) {
+        this.vsBot = false;
+        this.botColor = null;
+        botService = null;
+        System.out.println("Bot dekatywowany " + color);
+    }
+
     private void triggerBotMove() {
         // 1. Bot wylicza ruch (przekazujemy mu obecną macierz planszy)
         try {
