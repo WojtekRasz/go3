@@ -161,12 +161,14 @@ public class GameManager {
      * Starts the game and notifies all players.
      */
     public void startGame() {
+        if(gameContext.getGameState() == GameState.GAME_NOT_INITIALIZED){
+            GameEntity gameEntity = new GameEntity();
+            gameEntity.setStartTime(LocalDateTime.now());
+            gameRepository.save(gameEntity);
+            gameContext.setCurGameEntity(gameEntity);
+        }
         gameContext.startGame();
 
-        GameEntity gameEntity = new GameEntity();
-        gameEntity.setStartTime(LocalDateTime.now());
-        gameRepository.save(gameEntity);
-        gameContext.setCurGameEntity(gameEntity);
 
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
         outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
