@@ -137,8 +137,24 @@ class ClientThread implements Runnable {
             // Command Loop
             while (in.hasNextLine()) {
                 String clientMessage = in.nextLine();
-
                 try {
+                    if (clientMessage.equalsIgnoreCase("bot")) {
+                        synchronized (gamers) {
+                            if (gamers.size() < 2) {
+                                System.out.println("Dodaję bota jako przeciwnika!");
+                                PlayerColor botColor = (color == PlayerColor.BLACK) ? PlayerColor.WHITE
+                                        : PlayerColor.BLACK;
+                                gamers.add(botColor);
+                                gameManager.activateBot(botColor);
+                                out.println("BOT_READY Przeciwnik bot został dodany.");
+                                gameManager.startGame();
+                                System.out.println("Mamy 2 graczy! Uruchamiam grę.");
+                                // Od teraz GameManager musi wiedzieć, że jeśli tura należy do botColor,
+                                // to należy wywołać botService.
+                            }
+                        }
+                        continue;
+                    }
                     if (clientMessage.equalsIgnoreCase("quit")) {
                         break;
                     } else if (clientMessage.equals("GETBOARD")) {

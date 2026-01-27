@@ -1,5 +1,6 @@
 package lista4.gameLogic;
 
+import lista4.backend.BotService;
 import lista4.dbModel.GameEntity;
 import lista4.dbModel.MoveEntity;
 import lista4.dbRepositories.GameRepository;
@@ -39,6 +40,47 @@ public class GameManager {
 
     private GameRepository gameRepository;
     private MoveRepository moveRepository;
+
+    @Autowired
+    private BotService botService; // Twój algorytm mapy wpływów
+
+    private boolean vsBot = false;
+    private PlayerColor botColor;
+
+    // Metoda wołana z ClientThread, gdy gracz wpisze "bot"
+    public void activateBot(PlayerColor color) {
+        this.vsBot = true;
+        this.botColor = color;
+        botService = new BotService();
+        System.out.println("Bot aktywowany jako: " + color);
+        if (gameContext.getCurPlayerColor() == botColor) {
+            triggerBotMove();
+        }
+    }
+
+    private void triggerBotMove() {
+        // 1. Bot wylicza ruch (przekazujemy mu obecną macierz planszy)
+        try {
+            String bestMoveCoords = botService.calculateBestMove(board.getMatrix(), botColor);
+            String[] coords = bestMoveCoords.split(" ");
+            int x = Integer.parseInt(coords[0]);
+            int y = Integer.parseInt(coords[1]);
+
+            // 2. Jeśli bot zwrócił -1 -1 (brak ruchu), niech spasuje
+            if (x == -1 || y == -1) {
+                passMove(botColor);
+                return;
+            }
+
+            // 3. Wykonaj logikę ruchu
+            executeMoveLogic(new Move(x, y, botColor));
+        } catch (Exception e) {
+            // Jeśli bot się pomyli (np. samobójstwo), niech spasuje
+            System.err.println("Bot popełnił błąd, pasuje: " + e.getMessage());
+            passMove(botColor);
+        }
+    }
+
     /**
      * Private constructor for singleton pattern.
      * Initializes the board and sets the initial player.
@@ -69,6 +111,7 @@ public class GameManager {
         }
         return instance;
     }
+
     /**
      * Resets the GameManager instance for testing purposes.
      */
@@ -186,35 +229,55 @@ public class GameManager {
 
     // Robi ruchy
 
+    private void executeMoveLogic(Move move) throws Exception {
+        // 1. Walidacja
+        Exception canMakeMove = canMakeMove(move.playerColor);
+        if (canMakeMove != null)
+            throw canMakeMove;
+
+        // 2. Logika na planszy
+        Stone stone = new Stone(move.x, move.y, move.playerColor, board);
+        board.putStone(move.x, move.y, stone);
+
+        // 3. Zapis do DB (używamy wstrzykniętego moveRepository)
+        MoveEntity moveEntity = new MoveEntity();
+        moveEntity.setGame(gameContext.getCurGameEntity());
+        moveEntity.setMoveNumber(gameContext.getMoveNumber());
+        moveEntity.setX(move.x);
+        moveEntity.setY(move.y);
+        moveEntity.setColor(move.playerColor.toString());
+        moveEntity.setPass(false);
+        moveRepository.save(moveEntity);
+
+        // 4. Komunikacja
+        outAdapter.sendBoard(board, PlayerColor.BOTH);
+        sendCaptured();
+        gameContext.resetPasses();
+        gameContext.nextPlayer();
+        outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
+    }
+
     /**
-     * Makes move and send board and current player to output (eventually error instead if occurs)
+     * Makes move and send board and current player to output (eventually error
+     * instead if occurs)
      *
      * @param move Move that is meant to be done
      */
     public void makeMove(Move move) {
         try {
-            Exception canMakeMove = canMakeMove(move.playerColor);
-            if (canMakeMove != null)
-                throw canMakeMove;
+            executeMoveLogic(move);
 
-            Stone stone = new Stone(move.x, move.y, move.playerColor, board);
-            board.putStone(move.x, move.y, stone);
+            if (vsBot && gameContext.getCurPlayerColor() == botColor
+                    && gameContext.getGameState() == GameState.GAME_RUNNING) {
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                    }
+                    triggerBotMove();
+                }).start();
+            }
 
-            MoveEntity moveEntity = new MoveEntity();
-            moveEntity.setGame(gameContext.getCurGameEntity());
-            moveEntity.setMoveNumber(gameContext.getMoveNumber());
-            moveEntity.setX(move.x);
-            moveEntity.setY(move.y);
-            moveEntity.setColor(move.playerColor.toString());
-            moveEntity.setPass(false);
-            moveRepository.save(moveEntity);
-
-            outAdapter.sendBoard(board, PlayerColor.BOTH);
-            sendCaptured();
-            gameContext.resetPasses();
-            gameContext.nextPlayer();
-
-            outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
         } catch (Exception e) {
             outAdapter.sendExceptionMessage(e, move.playerColor);
         }
@@ -261,6 +324,7 @@ public class GameManager {
 
     /**
      * Resume game after fail in negotiation
+     * 
      * @param playerColor - player who stopped negotiations
      */
     public void resumeGame(PlayerColor playerColor) {
@@ -278,6 +342,7 @@ public class GameManager {
 
     /**
      * Sending to other player negotiation result to accept or refuse it
+     * 
      * @param playerColor - player who ended negotiations
      */
     public void proposeFinishNegotiation(PlayerColor playerColor) {
@@ -289,7 +354,9 @@ public class GameManager {
 
     /**
      * Finishes negotiation after 2nd player accepted
-     * @param color - player who finished negotiations (to validate its not the same who made proposal)
+     * 
+     * @param color - player who finished negotiations (to validate its not the same
+     *              who made proposal)
      */
     public void finishNegotiation(PlayerColor color) {
         if (colorOfProposal != color) {
@@ -305,6 +372,7 @@ public class GameManager {
 
     /**
      * Give up game
+     * 
      * @param playerColor - player who gives up
      */
     public void giveUpGame(PlayerColor playerColor) {
@@ -317,9 +385,10 @@ public class GameManager {
 
     /**
      * Add territory in negotiations
+     * 
      * @param playerColor - color of territory
-     * @param x - x cord of territory
-     * @param y - y cord of territory
+     * @param x           - x cord of territory
+     * @param y           - y cord of territory
      */
     public void addTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
@@ -333,9 +402,10 @@ public class GameManager {
 
     /**
      * Removes territory in negotiations
+     * 
      * @param playerColor - color of territory
-     * @param x - x cord of territory
-     * @param y - y cord of territory
+     * @param x           - x cord of territory
+     * @param y           - y cord of territory
      */
     public void removeTerritory(PlayerColor playerColor, int x, int y) {
         if (gameContext.getGameState() != GameState.NEGOTIATIONS) {
@@ -349,6 +419,7 @@ public class GameManager {
 
     /**
      * Adding captured stone of color
+     * 
      * @param playerColor - color of captured stone
      */
     public void addCaptured(PlayerColor playerColor) {
@@ -361,7 +432,6 @@ public class GameManager {
     public void sendCaptured() {
         outAdapter.sendCaptureStonesQuantity(
                 gameContext.getCaptured(PlayerColor.BLACK),
-                gameContext.getCaptured(PlayerColor.WHITE)
-        );
+                gameContext.getCaptured(PlayerColor.WHITE));
     }
 }

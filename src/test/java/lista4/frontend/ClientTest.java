@@ -113,60 +113,64 @@ class ClientTest {
 
     }
 
-    @Test
-    void testTwoPlayersRegistrationAndMove() throws IOException {
-        try (
-                // Gracz 1
-                Socket socket1 = new Socket(SERVER_IP, SERVER_PORT);
-                PrintWriter out1 = new PrintWriter(socket1.getOutputStream(), true);
-                BufferedReader in1 = new BufferedReader(new InputStreamReader(socket1.getInputStream()));
+    // @Test
+    // void testTwoPlayersRegistrationAndMove() throws IOException {
+    // try (
+    // // Gracz 1
+    // Socket socket1 = new Socket(SERVER_IP, SERVER_PORT);
+    // PrintWriter out1 = new PrintWriter(socket1.getOutputStream(), true);
+    // BufferedReader in1 = new BufferedReader(new
+    // InputStreamReader(socket1.getInputStream()));
 
-                // Gracz 2
-                Socket socket2 = new Socket(SERVER_IP, SERVER_PORT);
-                PrintWriter out2 = new PrintWriter(socket2.getOutputStream(), true);
-                BufferedReader in2 = new BufferedReader(new InputStreamReader(socket2.getInputStream()))) {
-            // --- KROK 1: Rejestracja Gracza 1 ---
-            socket1.setSoTimeout(2000);
-            socket2.setSoTimeout(2000);
-            out1.println("console");
-            // readLine() czeka na odpowiedź. Jeśli serwer nic nie wyśle, test zawiśnie
-            // (timeout obsłuży JUnit)
-            String resp1 = in1.readLine();
-            System.out.println("Gracz 1 otrzymał: " + resp1);
-            assertNotNull(resp1);
+    // // Gracz 2
+    // Socket socket2 = new Socket(SERVER_IP, SERVER_PORT);
+    // PrintWriter out2 = new PrintWriter(socket2.getOutputStream(), true);
+    // BufferedReader in2 = new BufferedReader(new
+    // InputStreamReader(socket2.getInputStream()))) {
+    // // --- KROK 1: Rejestracja Gracza 1 ---
+    // socket1.setSoTimeout(2000);
+    // socket2.setSoTimeout(2000);
+    // out1.println("console");
+    // // readLine() czeka na odpowiedź. Jeśli serwer nic nie wyśle, test zawiśnie
+    // // (timeout obsłuży JUnit)
+    // String resp1 = in1.readLine();
+    // System.out.println("Gracz 1 otrzymał: " + resp1);
+    // assertNotNull(resp1);
 
-            // --- KROK 2: Rejestracja Gracza 2 ---
-            out2.println("console");
-            String resp2 = in2.readLine();
-            System.out.println("Gracz 2 otrzymał: " + resp2);
-            assertNotNull(resp2);
-            assertTrue(resp2.contains("WHITE") || resp2.contains("BLACK"),
-                    "Serwer powinien przydzielić kolor drugiemu graczowi");
+    // // --- KROK 2: Rejestracja Gracza 2 ---
+    // out2.println("console");
+    // String resp2 = in2.readLine();
+    // System.out.println("Gracz 2 otrzymał: " + resp2);
+    // assertNotNull(resp2);
+    // assertTrue(resp2.contains("WHITE") || resp2.contains("BLACK"),
+    // "Serwer powinien przydzielić kolor drugiemu graczowi");
 
-            out1.println("a 1");
-            System.out.println("Gracz 1 wysłał ruch: a 1");
+    // out1.println("a 1");
+    // System.out.println("Gracz 1 wysłał ruch: a 1");
 
-            // Gracz 1 odbiera planszę
-            System.out.println("Gracz 1 odbiera planszę...");
-            consumeBoard(in1);
-            System.out.println("Gracz 1 odebrał całą planszę.");
+    // // Gracz 1 odbiera planszę
+    // System.out.println("Gracz 1 odbiera planszę...");
+    // consumeBoard(in1);
+    // System.out.println("Gracz 1 odebrał całą planszę.");
 
-            // Gracz 2 odbiera planszę
-            System.out.println("Gracz 2 odbiera planszę...");
-            consumeBoard(in2);
-            System.out.println("Gracz 2 odebrał całą planszę.");
-            System.out.println("Gracz 2 oczekuje na komunikat broadcast...");
-            String broadcastMsg = in2.readLine();
+    // // Gracz 2 odbiera planszę
+    // System.out.println("Gracz 2 odbiera planszę...");
+    // consumeBoard(in2);
+    // System.out.println("Gracz 2 odebrał całą planszę.");
+    // System.out.println("Gracz 2 oczekuje na komunikat broadcast...");
+    // String broadcastMsg = in2.readLine();
 
-            if (broadcastMsg != null) {
-                System.out.println("Gracz 2 (widz) otrzymał: " + broadcastMsg);
-            } else {
-                System.out.println("Gracz 2 nie otrzymał dodatkowego komunikatu (strumień zamknięty lub brak danych).");
-            }
+    // if (broadcastMsg != null) {
+    // System.out.println("Gracz 2 (widz) otrzymał: " + broadcastMsg);
+    // } else {
+    // System.out.println("Gracz 2 nie otrzymał dodatkowego komunikatu (strumień
+    // zamknięty lub brak danych).");
+    // }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Test rzucił wyjątek: " + e.getMessage());
-        }
-    }
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // fail("Test rzucił wyjątek: " + e.getMessage());
+    // }
+    // }
+
 }

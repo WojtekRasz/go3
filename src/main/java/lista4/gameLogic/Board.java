@@ -9,7 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents the Go board and handles stone placement, capturing, and rule enforcement.
+ * Represents the Go board and handles stone placement, capturing, and rule
+ * enforcement.
  * Manages board state including Ko situations, suicides, and chains of stones.
  */
 public class Board {
@@ -47,9 +48,9 @@ public class Board {
     private final int boardSize = 19;
     private final Field[][] board;
 
-
     /**
-     * Initializes a new empty board with {@code boardSize} x {@code boardSize} fields.
+     * Initializes a new empty board with {@code boardSize} x {@code boardSize}
+     * fields.
      */
     public Board() {
         ko = false;
@@ -60,7 +61,6 @@ public class Board {
             }
         }
     }
-
 
     /**
      * Checks whether the specified coordinates are inside the board.
@@ -89,55 +89,58 @@ public class Board {
     }
 
     /**
-     * Determines if placing a stone would be suicide, taking into account 
+     * Determines if placing a stone would be suicide, taking into account
      * friendly chains and their liberties.
      *
      * @param chains Set of neighboring friendly chains
-     * @param stone Stone to be placed
+     * @param stone  Stone to be placed
      * @return true if the move would result in suicide
      */
-    public boolean checkSuicide(Set<StoneChain> chains, Stone stone){
+    public boolean checkSuicide(Set<StoneChain> chains, Stone stone) {
         int allBreaths = 0;
-        //Sumuje oddechy kamienia stone i wszystkie oddechy łańcuchów chains (w założeniu mają to być sąsiedzi)
+        // Sumuje oddechy kamienia stone i wszystkie oddechy łańcuchów chains (w
+        // założeniu mają to być sąsiedzi)
         allBreaths += stone.getChain().getBreathCount();
-        for(StoneChain stonesChain : chains) {
+        for (StoneChain stonesChain : chains) {
             allBreaths += stonesChain.getBreathCount();
         }
         return allBreaths == 0;
     }
 
     /**
-     * Places a stone on the board and handles capturing, merging chains, 
+     * Places a stone on the board and handles capturing, merging chains,
      * suicide checks, and Ko rule.
      *
-     * @param x X coordinate to place the stone
-     * @param y Y coordinate to place the stone
+     * @param x     X coordinate to place the stone
+     * @param y     Y coordinate to place the stone
      * @param stone Stone to be placed
-     * @throws FieldNotAvailableException if the field is already occupied or move is illegal
+     * @throws FieldNotAvailableException if the field is already occupied or move
+     *                                    is illegal
      */
     public void putStone(int x, int y, Stone stone) throws FieldNotAvailableException {
         Set<StoneChain> friendlyNeighbourChain = new HashSet<>();
         Set<StoneChain> stonesChainsToCapture = new HashSet<>();
 
-        //Sprawdza czy pole na planszy jest puste
-        if (!isEmpty(x,y)) {
+        // Sprawdza czy pole na planszy jest puste
+        if (!isEmpty(x, y)) {
             throw new FieldOcupiedException(new Move(x, y, stone.getPlayerColor()));
         }
 
-        //Kładzie kamieńs na planszy(przy błędach zostanie on usunięty)
+        // Kładzie kamieńs na planszy(przy błędach zostanie on usunięty)
         board[x][y].putStone(stone);
 
-        //Sprawdza sąsiadów i liczy przyjazne kamienie, by potencjalnie połączyć się z nimi w łańcuch
-        //Szuka też łańcuchów kamieni przeciwnika, które straciły wszystkie oddechy
-        for(Field neighbour : board[x][y].getNeighbours()) {
-            if (neighbour.getStone() == null) continue;
+        // Sprawdza sąsiadów i liczy przyjazne kamienie, by potencjalnie połączyć się z
+        // nimi w łańcuch
+        // Szuka też łańcuchów kamieni przeciwnika, które straciły wszystkie oddechy
+        for (Field neighbour : board[x][y].getNeighbours()) {
+            if (neighbour.getStone() == null)
+                continue;
 
             Stone neighbourStone = neighbour.getStone();
-            if(neighbourStone.getPlayerColor() == stone.getPlayerColor()) {
+            if (neighbourStone.getPlayerColor() == stone.getPlayerColor()) {
                 friendlyNeighbourChain.add(neighbourStone.getChain());
-            }
-            else {
-                if(neighbourStone.getChain().isDead()) {
+            } else {
+                if (neighbourStone.getChain().isDead()) {
                     stonesChainsToCapture.add(neighbourStone.getChain());
                 }
             }
@@ -145,42 +148,48 @@ public class Board {
 
         boolean hasCaptured = false;
 
-        //Jeżeli są kamienie do bicia, które są w KO (czyli wcześniej kamień, który tam był zbijał jak w ruchu samobójczym)
-        //to usuwa kamień wyrzuca błąd
-        if(!stonesChainsToCapture.isEmpty() && ko){
-            for(StoneChain stonesChain : stonesChainsToCapture) {
-                if(stonesChain.getStones().contains(koStone)) {
+        // Jeżeli są kamienie do bicia, które są w KO (czyli wcześniej kamień, który tam
+        // był zbijał jak w ruchu samobójczym)
+        // to usuwa kamień wyrzuca błąd
+        if (!stonesChainsToCapture.isEmpty() && ko) {
+            for (StoneChain stonesChain : stonesChainsToCapture) {
+                if (stonesChain.getStones().contains(koStone)) {
                     removeStone(x, y);
                     throw new CaptureInKoException();
                 }
             }
         }
 
-        //Sprawdza, czy postawiony kamień z sąsiadami tworzą łańcuch samobójczy przed zbiciem
+        // Sprawdza, czy postawiony kamień z sąsiadami tworzą łańcuch samobójczy przed
+        // zbiciem
         boolean suicide = checkSuicide(friendlyNeighbourChain, stone);
 
-        //Sprawdziliśmy już wcześniej czy bicie jest w KO, więc skoro tu doszliśmy, to nie jest, czyli zbijamy
-        for(StoneChain stonesChain : stonesChainsToCapture) {
+        // Sprawdziliśmy już wcześniej czy bicie jest w KO, więc skoro tu doszliśmy, to
+        // nie jest, czyli zbijamy
+        for (StoneChain stonesChain : stonesChainsToCapture) {
             stonesChain.captureChain();
             System.out.println("BICIE");
             hasCaptured = true;
         }
 
-        //Jeżeli ruch nic nie zbija i był samobójczy (co oznacza, że dalej jest, skoro nic nie zbił)
-        //to wyrzuca błąd i usuwa kamień
-        if(!hasCaptured && suicide) {
+        // Jeżeli ruch nic nie zbija i był samobójczy (co oznacza, że dalej jest, skoro
+        // nic nie zbił)
+        // to wyrzuca błąd i usuwa kamień
+        if (!hasCaptured && suicide) {
             System.out.println("SAMOBÓJSTWO");
-            removeStone(x, y) ;
+            removeStone(x, y);
             throw new SuicideException(new Move(x, y, stone.getPlayerColor()));
         }
 
-        //Jeżeli ruch był samobójczy, ale zbił kamienie następuje KO
+        // Jeżeli ruch był samobójczy, ale zbił kamienie następuje KO
         ko = suicide;
-        if(ko) koStone = stone;
-        else koStone = null;
+        if (ko)
+            koStone = stone;
+        else
+            koStone = null;
 
-        //Łączy łańcuchy w jeden łańcuch
-        for(StoneChain stonesChain : friendlyNeighbourChain) {
+        // Łączy łańcuchy w jeden łańcuch
+        for (StoneChain stonesChain : friendlyNeighbourChain) {
             stone.getChain().merge(stonesChain);
         }
 
@@ -192,7 +201,7 @@ public class Board {
      * @param x X coordinate
      * @param y Y coordinate
      */
-    public void removeStone(int x, int y){
+    public void removeStone(int x, int y) {
         getField(x, y).putStone(null);
     }
 
@@ -223,7 +232,6 @@ public class Board {
         return null;
     }
 
-
     /**
      * Returns the size of the board (number of fields per side).
      *
@@ -231,5 +239,21 @@ public class Board {
      */
     public int getSize() {
         return this.boardSize;
+    }
+
+    public int[][] getMatrix() {
+        int size = 19; // lub Twoja zmienna rozmiaru
+        int[][] matrix = new int[size][size];
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                Stone s = getStone(x, y); // zakładam, że masz taką metodę
+                if (s == null) {
+                    matrix[x][y] = 0;
+                } else {
+                    matrix[x][y] = (s.getPlayerColor() == PlayerColor.BLACK) ? 1 : 2;
+                }
+            }
+        }
+        return matrix;
     }
 }

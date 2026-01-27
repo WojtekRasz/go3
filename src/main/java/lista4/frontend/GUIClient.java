@@ -60,6 +60,7 @@ public class GUIClient extends Application {
 
     private Button passButton;
     private Button resignButton;
+    private Button playWithBotButton; // active when 1 player, when pressed run the bot
     private Button propositionButton; // Sends a territory proposition
     private Button resumeButton; // Resumes the game (rejects negotiation start)
     private Button acceptProposalButton; // Accepts the opponent's territory arrangement
@@ -126,6 +127,11 @@ public class GUIClient extends Application {
         resignButton = new Button("Poddaj się");
         resignButton.setOnAction(e -> sendCommand("GIVE UP"));
 
+        playWithBotButton = new Button("graj z botem");
+        playWithBotButton.setVisible(true); // Domyślnie ukryty
+        playWithBotButton.setManaged(true); // Domyślnie nie zajmuje miejsca
+        playWithBotButton.setOnAction(e -> sendCommand("BOT"));
+
         propositionButton = new Button("zaproponuj terytorium");
         propositionButton.setVisible(false); // Domyślnie ukryty
         propositionButton.setManaged(false); // Domyślnie nie zajmuje miejsca
@@ -157,7 +163,7 @@ public class GUIClient extends Application {
             isPuttingPossible = false;
         });
         resumeButton.setOnAction(e -> sendCommand("RESUME"));
-        HBox standardRow = new HBox(10, passButton, resignButton, propositionButton);
+        HBox standardRow = new HBox(10, passButton, resignButton, propositionButton, playWithBotButton);
         standardRow.setAlignment(Pos.CENTER);
 
         // Rząd 2: Akcje negocjacyjne (pojawiają się dynamicznie)
@@ -518,6 +524,9 @@ public class GUIClient extends Application {
                             isPuttingPossible = true;
                             logArea.appendText("SYSTEM: negocjacji.\n");
                             setNegotiationModeUI(true);
+                        } else if (message.startsWith("BOT_READY")) { // bot ready, change button visibility
+                            playWithBotButton.setManaged(false);
+                            playWithBotButton.setVisible(false);
                         } else if (message.equals("NEGOTIATION PROPOSITION")) {
                             isPuttingPossible = false;
                             logArea.appendText("SYSTEM: Przesłano propozycje.\n");
