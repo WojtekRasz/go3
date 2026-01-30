@@ -14,6 +14,14 @@ import java.util.Set;
  * Manages board state including Ko situations, suicides, and chains of stones.
  */
 public class Board {
+    public void clearBoard() {
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                board[row][col].putStone(null);
+            }
+        }
+    }
+
     /**
      * Represents the four orthogonal directions for neighboring fields.
      */

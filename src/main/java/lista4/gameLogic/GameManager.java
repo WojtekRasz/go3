@@ -13,6 +13,8 @@ import lista4.gameLogic.state.GameState;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Singleton class responsible for managing the overall game flow.
@@ -179,6 +181,7 @@ public class GameManager {
 
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
         outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
+
 
     }
 
@@ -442,5 +445,21 @@ public class GameManager {
         outAdapter.sendCaptureStonesQuantity(
                 gameContext.getCaptured(PlayerColor.BLACK),
                 gameContext.getCaptured(PlayerColor.WHITE));
+    }
+
+    public void loadGame(GameEntity gameEntity) {
+        board.clearBoard();
+        gameContext.setCurGameEntity(gameEntity);
+        gameContext.setGameState(GameState.GAME_RUNNING);
+        List<MoveEntity> moves = moveRepository.findByGameOrderByMoveNumberAsc(gameEntity);
+        for (MoveEntity move : moves) {
+            if (move.isPass()) {
+                gameContext.setCurPlayerColor(PlayerColor.valueOf(move.getColor()).other());
+                continue;
+            }
+            Stone stone = new Stone(move.getX(), move.getY(), PlayerColor.valueOf(move.getColor()), board);
+            board.putStone(move.getX(), move.getY(), stone);
+            gameContext.setCurPlayerColor(PlayerColor.valueOf(move.getColor()).other());
+        }
     }
 }
