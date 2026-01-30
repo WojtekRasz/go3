@@ -462,4 +462,16 @@ public class GameManager {
             gameContext.setCurPlayerColor(PlayerColor.valueOf(move.getColor()).other());
         }
     }
+
+    public void sendGameList(PlayerColor playerColor) {
+        List<GameEntity> games = gameRepository.findAll();
+        outAdapter.sendGamesList(games, playerColor);
+    }
+
+    public void loadGameById(Long gameId) {
+        GameEntity gameEntity = gameRepository.findById(gameId).orElse(null);
+        if (gameEntity != null) {
+            loadGame(gameEntity);
+        }
+    }
 }

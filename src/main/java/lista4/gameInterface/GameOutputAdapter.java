@@ -1,9 +1,11 @@
 package lista4.gameInterface;
 
+import lista4.dbModel.GameEntity;
 import lista4.gameLogic.Board;
 import lista4.gameLogic.state.GameState;
 import lista4.gameLogic.PlayerColor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Defines the contract for sending game updates to clients.
@@ -154,4 +156,6 @@ public interface GameOutputAdapter<OutputType> {
      * @param board The current state of the board to be redrawn.
      */
     void resumeGame(Board board);
+
+    void sendGamesList(List<GameEntity> gamesList, PlayerColor target);
 }
