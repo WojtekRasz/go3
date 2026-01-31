@@ -24,7 +24,7 @@ public class BotService {
             // System.out.print("\n");
         }
 
-        // 2. Dylatacja (Rozprzestrzenianie wpływów) - 5 iteracji
+        // 2. Dylatacja - 5 iteracji
         for (int iter = 0; iter < 8; iter++) {
             influenceMap = dilate(influenceMap);
             for (int i = 0; i < size; i++) {

@@ -160,10 +160,25 @@ public class InputGameAdapter implements GameInputAdapter<String> {
         gameManager.finishNegotiation(color);
     }
 
+    /**
+     * Send request to load games from database
+     * <p>
+     * This will send a list of games to frontend
+     * </p>
+     *
+     * @param color The color of the player who send a request.
+     */
     public void sendGamesList(PlayerColor color) {
         gameManager.sendGameList(color);
     };
 
+    /**
+     * <p>
+     * Will reload a board to a game with the id in argument
+     * </p>
+     *
+     * @param gameId the id of the game which will be loaded.
+     */
     public void loadGameById(Long gameId) {
         gameManager.loadGameById(gameId);
     };

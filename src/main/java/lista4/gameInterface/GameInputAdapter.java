@@ -101,7 +101,22 @@ public interface GameInputAdapter<InputType> {
      */
     void acceptFinishNegotiation(PlayerColor color);
 
+    /**
+     * Send request to load games from database
+     * <p>
+     * This will send a list of games to frontend
+     * </p>
+     *
+     * @param color The color of the player who send a request.
+     */
     void sendGamesList(PlayerColor color);
 
+    /**
+     * <p>
+     * Will reload a board to a game with the id in argument
+     * </p>
+     *
+     * @param gameId the id of the game which will be loaded.
+     */
     void loadGameById(Long gameId);
 }

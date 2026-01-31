@@ -157,5 +157,11 @@ public interface GameOutputAdapter<OutputType> {
      */
     void resumeGame(Board board);
 
+    /**
+     * Sends list of games to the user who asked
+     * 
+     * @param gamesList   - list of params from backend
+     * @param playerColor - player who will receive the list of games
+     */
     void sendGamesList(List<GameEntity> gamesList, PlayerColor target);
 }

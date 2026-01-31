@@ -236,6 +236,12 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
         sendBoard(board, PlayerColor.BOTH);
     }
 
+    /**
+     * Sends list of games to the user who asked
+     * 
+     * @param gamesList   - list of params from backend
+     * @param playerColor - player who will receive the list of games
+     */
     public void sendGamesList(List<GameEntity> gamesList, PlayerColor playerColor) {
         for (GameEntity game : gamesList) {
             sendToTarget("SAVEDGAME " + game.getId() + " " + game.getStartTime(), playerColor);
