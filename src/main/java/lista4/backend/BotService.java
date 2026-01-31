@@ -25,7 +25,7 @@ public class BotService {
         }
 
         // 2. Dylatacja (Rozprzestrzenianie wpływów) - 5 iteracji
-        for (int iter = 0; iter < 5; iter++) {
+        for (int iter = 0; iter < 8; iter++) {
             influenceMap = dilate(influenceMap);
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {

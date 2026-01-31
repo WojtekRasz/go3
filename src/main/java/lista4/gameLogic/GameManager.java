@@ -75,8 +75,7 @@ public class GameManager {
             int x = Integer.parseInt(coords[0]);
             int y = Integer.parseInt(coords[1]);
 
-            // 2. Jeśli bot zwrócił -1 -1 (brak ruchu), niech spasuje
-            if (x == -1 || y == -1) {
+            if (x == -1 || y == -1) { // gdy tak to nie istnieje ruch
                 passMove(botColor);
                 return;
             }
@@ -170,14 +169,13 @@ public class GameManager {
      * Starts the game and notifies all players.
      */
     public void startGame() {
-        if(gameContext.getGameState() == GameState.GAME_NOT_INITIALIZED){
+        if (gameContext.getGameState() == GameState.GAME_NOT_INITIALIZED) {
             GameEntity gameEntity = new GameEntity();
             gameEntity.setStartTime(LocalDateTime.now());
             gameRepository.save(gameEntity);
             gameContext.setCurGameEntity(gameEntity);
         }
         gameContext.startGame();
-
 
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
         outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
@@ -324,6 +322,16 @@ public class GameManager {
                 outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
             } else {
                 outAdapter.sendCurrentPlayer(playerColor.other());
+            }
+            if (vsBot && gameContext.getCurPlayerColor() == botColor
+                    && gameContext.getGameState() == GameState.GAME_RUNNING) {
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                    }
+                    triggerBotMove();
+                }).start();
             }
 
         } catch (Exception e) {
