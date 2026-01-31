@@ -180,7 +180,6 @@ public class GameManager {
         outAdapter.sendState(gameContext.getGameState(), PlayerColor.BOTH);
         outAdapter.sendCurrentPlayer(gameContext.getCurPlayerColor());
 
-
     }
 
     /**
@@ -469,6 +468,7 @@ public class GameManager {
             board.putStone(move.getX(), move.getY(), stone);
             gameContext.setCurPlayerColor(PlayerColor.valueOf(move.getColor()).other());
         }
+        sendBoard(PlayerColor.BOTH);
     }
 
     public void sendGameList(PlayerColor playerColor) {

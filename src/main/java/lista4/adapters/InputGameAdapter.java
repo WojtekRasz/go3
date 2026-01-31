@@ -159,4 +159,13 @@ public class InputGameAdapter implements GameInputAdapter<String> {
     public void acceptFinishNegotiation(PlayerColor color) {
         gameManager.finishNegotiation(color);
     }
+
+    public void sendGamesList(PlayerColor color) {
+        gameManager.sendGameList(color);
+    };
+
+    public void loadGameById(Long gameId) {
+        gameManager.loadGameById(gameId);
+    };
+
 }

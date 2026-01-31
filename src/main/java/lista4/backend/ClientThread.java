@@ -154,6 +154,11 @@ class ClientThread implements Runnable {
                             }
                         }
                         continue;
+                    } else if (clientMessage.contains("LOADGAMES")) {
+                        inAdapter.sendGamesList(color);
+                    } else if (clientMessage.startsWith("LOADBYID")) {
+                        Long id = Long.parseLong(clientMessage.split(" ")[1]);
+                        inAdapter.loadGameById(id);
                     }
                     if (clientMessage.equalsIgnoreCase("quit")) {
                         break;

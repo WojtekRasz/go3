@@ -100,4 +100,8 @@ public interface GameInputAdapter<InputType> {
      * @param color The color of the player finalizing the negotiation.
      */
     void acceptFinishNegotiation(PlayerColor color);
+
+    void sendGamesList(PlayerColor color);
+
+    void loadGameById(Long gameId);
 }

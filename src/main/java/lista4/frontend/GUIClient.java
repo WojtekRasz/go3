@@ -1,5 +1,7 @@
 package lista4.frontend;
 
+import javafx.scene.layout.StackPane;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -9,7 +11,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -52,6 +56,11 @@ public class GUIClient extends Application {
 
     // UI Components
     private TextArea logArea;
+    private Button loadGameButton;
+    private Button showGamesButton;
+    private Stage savedGamesStage;
+    private TextArea savedGames;
+    private TextField loadGameInput;
     private Label playerInfoLabel;
     private Label blackCapturedLabel;
     private Label whiteCapturedLabel;
@@ -116,7 +125,32 @@ public class GUIClient extends Application {
         whiteIcon.setStroke(Color.BLACK);
         whiteCapturedLabel = new Label("0");
 
-        HBox scoreBox = new HBox(10, playerInfoLabel, blackIcon, blackCapturedLabel, whiteIcon, whiteCapturedLabel);
+        // load game from database Area
+        loadGameInput = new TextField();
+        loadGameButton = new Button("wczytaj");
+        loadGameButton.setOnAction(e -> {
+            String text = loadGameInput.getText();
+            if (!text.equals("")) {
+                sendCommand("LOADBYID " + text);
+            }
+        });
+        savedGamesStage = new Stage();
+        savedGamesStage.setTitle("Lista gier.");
+        savedGames = new TextArea("Lista zapisanych gier: ");
+        savedGames.setWrapText(true);
+        savedGames.setEditable(false);
+        VBox uklad = new VBox(savedGames, loadGameInput, loadGameButton);
+        Scene scena = new Scene(uklad, 300, 200);
+        savedGamesStage.setScene(scena);
+
+        showGamesButton = new Button("lista gier");
+        showGamesButton.setOnAction(e -> {
+            sendCommand("LOADGAMES");
+            // savedGamesStage.showAndWait(); poniżej gdy odsłucham
+        });
+
+        HBox scoreBox = new HBox(10, playerInfoLabel, blackIcon, blackCapturedLabel, whiteIcon, whiteCapturedLabel,
+                showGamesButton);
         scoreBox.setAlignment(Pos.CENTER_LEFT);
         scoreBox.setPadding(new Insets(10));
 
@@ -524,6 +558,14 @@ public class GUIClient extends Application {
                             isPuttingPossible = true;
                             logArea.appendText("SYSTEM: negocjacji.\n");
                             setNegotiationModeUI(true);
+                        } else if (message.startsWith("SAVEDGAME")) {
+                            String[] parts = message.split(" ");
+                            String id = parts[1];
+                            String date = parts[2];
+                            String oldText = savedGames.getText();
+                            savedGames.setText(oldText + "\n" + "id: " + id + " data: " + date);
+                            savedGamesStage.showAndWait();
+
                         } else if (message.startsWith("BOT_READY")) { // bot ready, change button visibility
                             playWithBotButton.setManaged(false);
                             playWithBotButton.setVisible(false);
@@ -588,6 +630,7 @@ public class GUIClient extends Application {
                             }
                         } else {
                             logArea.setText("" + message + "\n");
+                            System.out.println(message);
                         }
                     });
                 }

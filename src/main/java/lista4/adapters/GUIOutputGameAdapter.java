@@ -1,9 +1,11 @@
 package lista4.adapters;
 
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import lista4.dbModel.GameEntity;
 import lista4.gameInterface.GameOutputAdapter;
 import lista4.gameLogic.Board;
 import lista4.gameLogic.state.GameState;
@@ -232,5 +234,12 @@ public class GUIOutputGameAdapter implements GameOutputAdapter<String> {
      */
     public void resumeGame(Board board) {
         sendBoard(board, PlayerColor.BOTH);
+    }
+
+    public void sendGamesList(List<GameEntity> gamesList, PlayerColor playerColor) {
+        for (GameEntity game : gamesList) {
+            sendToTarget("SAVEDGAME " + game.getId() + " " + game.getStartTime(), playerColor);
+        }
+
     }
 }
