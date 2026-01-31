@@ -4,15 +4,39 @@ import org.springframework.stereotype.Service;
 import lista4.gameLogic.PlayerColor;
 import java.math.*;
 
+/**
+ * Service responsible for calculating the bot's moves.
+ * It uses an influence map algorithm to evaluate territory control on the board
+ * and select the most strategic position.
+ */
 @Service
 public class BotService {
 
+    /**
+     * Calculates the best move for the bot based on the current board state.
+     *
+     * The algorithm operates in the following steps:
+     * 1. Influence Map Initialization: Black stones are assigned a value of 128,
+     * and White stones a value of -128.
+     * 2. Dilation (Blurring): The influence is spread to neighboring cells over
+     * 8 iterations. After each iteration, the values of occupied cells are
+     * reset to their maximum to act as permanent sources of influence.
+     * 3. Move Selection: The bot scans for an empty cell with the highest
+     * influence value favorable to its color.
+     *
+     * @param board    A 2D integer array representing the board, where 0 is empty,
+     *                 1 is a black stone, and 2 is a white stone.
+     * @param botColor The color of the player the bot is simulating (BLACK or
+     *                 WHITE).
+     * @return A string representing the coordinates of the best move in "x y"
+     *         format.
+     */
     public String calculateBestMove(int[][] board, PlayerColor botColor) {
         int size = board.length;
         double[][] influenceMap = new double[size][size];
 
-        // 1. Inicjalizacja mapy na podstawie kamieni
-        // Czarny = 128, Biały = -128
+        // 1. Map initialization based on stones
+        // Black = 128, White = -128
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 if (board[x][y] == 1)
@@ -40,7 +64,7 @@ public class BotService {
 
         }
 
-        // 3. Wybór ruchu: Bot szuka wolnego miejsca z największym wpływem dla siebie
+        // 3. Move selection: Bot looks for an empty spot with the highest influence
         int bestX = -1, bestY = -1;
         double maxInfluence = -Double.MAX_VALUE;
 
@@ -56,6 +80,7 @@ public class BotService {
                 }
             }
         }
+        // Debugging output
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 System.out.print("[" + influenceMap[j][i] + "]");
@@ -66,6 +91,16 @@ public class BotService {
         return bestX + " " + bestY;
     }
 
+    /**
+     * Performs a single iteration of dilation (blurring) on the influence map.
+     *
+     * Calculates the new value of each cell as the average of the cell itself
+     * and its immediate neighbors (up, down, left, right).
+     * The result is rounded to the nearest integer.
+     *
+     * @param map The current influence map.
+     * @return A new 2D array containing the processed map values.
+     */
     private double[][] dilate(double[][] map) {
         int size = map.length;
         double[][] newMap = new double[size][size];
